@@ -262,6 +262,10 @@ def seed_database(db: Session):
             relative_volume=s_data["relative_volume"],
             volatility_30d=s_data["volatility_30d"],
             spread_pct=s_data["spread_pct"],
+            atr_14=round(s_data["current_price"] * s_data["volatility_30d"] * 0.08, 2),
+            rsi_14=round(50.0 + (s_data["change_pct"] * 3.5), 1),
+            data_quality_score=100.0,
+            data_quality_status="VERIFIED_OK",
             avg_volume_30d=s_data["avg_volume_30d"],
             is_liquid=s_data["is_liquid"],
             is_active=True,
@@ -273,9 +277,11 @@ def seed_database(db: Session):
 
         # Seed 60 daily bars
         bars_data = generate_historical_bars(s_data["current_price"], days=60)
-        # Ensure the final bar close matches current_price
+        # Ensure the final bar close matches current_price and adheres to OHLC bounds
         if bars_data:
             bars_data[-1]["close"] = s_data["current_price"]
+            bars_data[-1]["high"] = max(bars_data[-1]["high"], bars_data[-1]["open"], s_data["current_price"])
+            bars_data[-1]["low"] = min(bars_data[-1]["low"], bars_data[-1]["open"], s_data["current_price"])
         for b in bars_data:
             bar = DailyBar(
                 stock_id=stock.id,

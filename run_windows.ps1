@@ -1,4 +1,4 @@
-﻿# Why Smart Money AI - Windows PowerShell Startup Script
+# Why Smart Money AI - Windows PowerShell Startup Script
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "   WHY SMART MONEY AI - QUANTITATIVE INTELLIGENCE SYSTEM   " -ForegroundColor Cyan

@@ -26,6 +26,7 @@ function SmartMoneyContent() {
   const [stock, setStock] = useState<Stock | null>(null);
   const [bars, setBars] = useState<Bar[]>([]);
   const [metric, setMetric] = useState<SmartMoneyMetric | null>(null);
+  const [techAnalysis, setTechAnalysis] = useState<any | null>(null);
   const [availableStocks, setAvailableStocks] = useState<Stock[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,14 +46,16 @@ function SmartMoneyContent() {
     async function loadTickerData() {
       setLoading(true);
       try {
-        const [stockData, barsData, smData] = await Promise.all([
+        const [stockData, barsData, smData, techData] = await Promise.all([
           api.getStock(selectedTicker),
           api.getStockBars(selectedTicker, 60),
-          api.getSmartMoney(selectedTicker).catch(() => null)
+          api.getSmartMoney(selectedTicker).catch(() => null),
+          api.getTechnicalAnalysis(selectedTicker).catch(() => null)
         ]);
         setStock(stockData);
         setBars(barsData);
         setMetric(smData);
+        setTechAnalysis(techData);
       } catch (err) {
         console.error(`Failed to load data for ${selectedTicker}:`, err);
       } finally {
@@ -187,6 +190,25 @@ function SmartMoneyContent() {
                 <span className="text-gray-400 font-sans">Divergence Signal:</span>
                 <span className="text-amber-400 font-bold">{metric?.volume_price_divergence}</span>
               </div>
+
+              {techAnalysis && (
+                <div className="pt-2 border-t border-dark-750 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 font-sans">RSI (14-day):</span>
+                    <span className={`font-bold ${techAnalysis.rsi_14 > 70 ? 'text-red-400' : techAnalysis.rsi_14 < 30 ? 'text-emerald-400' : 'text-gray-200'}`}>
+                      {techAnalysis.rsi_14}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 font-sans">ATR (14-day Volatility):</span>
+                    <span className="text-gray-200 font-bold">${techAnalysis.atr_14}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 font-sans">Data Quality Integrity:</span>
+                    <span className="text-emerald-400 font-bold">{techAnalysis.data_quality_score}/100</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Quick Link to AI Forecast & Signals */}

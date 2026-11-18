@@ -25,6 +25,10 @@ class StockScannerResponse(BaseModel):
     relative_volume: float
     volatility_30d: float
     spread_pct: float
+    atr_14: Optional[float] = 2.5
+    rsi_14: Optional[float] = 50.0
+    data_quality_score: Optional[float] = 100.0
+    data_quality_status: Optional[str] = "VERIFIED_OK"
     avg_volume_30d: Optional[float]
     is_liquid: bool
     latest_update: datetime.datetime

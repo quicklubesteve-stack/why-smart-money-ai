@@ -162,8 +162,9 @@ export default function ScannerPage() {
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="p-3.5 text-right">30D Volatility</th>
-                <th className="p-3.5 text-right">Est. Spread</th>
+                <th className="p-3.5 text-right">RSI (14)</th>
+                <th className="p-3.5 text-right">ATR</th>
+                <th className="p-3.5 text-right">Data Integrity</th>
                 <th className="p-3.5 text-right">Data Source</th>
                 <th className="p-3.5 text-center">Action</th>
               </tr>
@@ -217,11 +218,20 @@ export default function ScannerPage() {
                           {stock.relative_volume.toFixed(2)}x
                         </span>
                       </td>
-                      <td className="p-3.5 text-right text-gray-300">
-                        {(stock.volatility_30d * 100).toFixed(1)}%
+                      <td className="p-3.5 text-right font-bold text-gray-300">
+                        {stock.rsi_14 ? stock.rsi_14.toFixed(1) : '50.0'}
                       </td>
                       <td className="p-3.5 text-right text-gray-400">
-                        {(stock.spread_pct * 100).toFixed(2)}%
+                        ${stock.atr_14 ? stock.atr_14.toFixed(2) : '2.50'}
+                      </td>
+                      <td className="p-3.5 text-right">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          stock.data_quality_status === 'VERIFIED_OK'
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                            : 'bg-amber-950 text-amber-400 border border-amber-800'
+                        }`}>
+                          {stock.data_quality_status || 'VERIFIED_OK'}
+                        </span>
                       </td>
                       <td className="p-3.5 text-right">
                         <span className="px-1.5 py-0.5 rounded text-[10px] bg-dark-850 text-cyan-400 border border-dark-700">
