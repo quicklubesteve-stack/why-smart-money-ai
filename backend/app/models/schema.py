@@ -204,3 +204,28 @@ class HistoricalPerformance(Base):
     sample_trades_count = Column(Integer, default=142)
     brier_calibration_score = Column(Float, default=0.18)
     category = Column(String, default="PAPER_SIMULATION")  # BACKTEST, PAPER_SIMULATION, LIVE
+
+
+class PredictionRealization(Base):
+    """
+    Time-stamped audit tracking predictions vs subsequently realized market outcomes.
+    Used to compute empirical directional accuracy, precision, recall, win rate, and Brier calibration score.
+    """
+    __tablename__ = "prediction_realizations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String, nullable=False, index=True)
+    exchange = Column(String, default="NASDAQ")
+    currency = Column(String, default="USD")
+    horizon = Column(String, nullable=False)  # Intraday, 1D, 5D, 20D
+    forecast_timestamp = Column(String, nullable=False)  # e.g. "2026-11-10 05:00:00 EST"
+    predicted_direction = Column(String, nullable=False)  # UP, DOWN
+    calibrated_prob = Column(Float, nullable=False)  # Platt-scaled probability
+    entry_price = Column(Float, nullable=False)
+    realized_timestamp = Column(String, nullable=False)  # e.g. "2026-11-15 16:00:00 EST"
+    realized_price = Column(Float, nullable=False)
+    realized_return_pct = Column(Float, nullable=False)
+    directional_hit = Column(Boolean, nullable=False)  # True if predicted UP and return > 0 or predicted DOWN and return < 0
+    trade_win = Column(Boolean, nullable=False)
+    brier_score_component = Column(Float, nullable=False)  # (prob - actual)^2
+    environment = Column(String, default="PAPER_SIMULATION")  # BACKTEST, PAPER_SIMULATION, LIVE

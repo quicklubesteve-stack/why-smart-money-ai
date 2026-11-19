@@ -102,19 +102,17 @@ Starts:
 
 ## Cloud Deployment Plan (24/7 Execution with Laptop Off)
 
-To ensure the 5:00 AM America/Toronto market brief and scanning jobs run every trading morning even when your Acer laptop is powered off, deploy the platform to a cloud container runtime:
+To ensure the **5:00 AM America/Toronto** market brief, pre-open 9:15 AM refresh, and Telegram alerts execute reliably every trading morning even when your Acer laptop is powered off, refer to the detailed production guide:
 
-1. **Option 1: Railway / Render (Zero Devops)**
-   - Connect your GitHub repository to Railway or Render.
-   - Deploy `backend/Dockerfile` with a persistent PostgreSQL database.
-   - Configure cron trigger or background worker: `APScheduler` inside FastAPI runs continuously in the cloud container.
-   - Deploy `frontend/` as a static/Node web service.
+- **Full Cloud Architecture & Systemd Guide:** [docs/cloud_deployment.md](file:///c:/Users/steve/OneDrive/Desktop/smart%20money/docs/cloud_deployment.md)
+- **Production Multi-Container Compose:** [docker-compose.prod.yml](file:///c:/Users/steve/OneDrive/Desktop/smart%20money/docker-compose.prod.yml)
+- **Linux Systemd Units:** [systemd/why-smart-money-backend.service](file:///c:/Users/steve/OneDrive/Desktop/smart%20money/systemd/why-smart-money-backend.service) and [systemd/why-smart-money-frontend.service](file:///c:/Users/steve/OneDrive/Desktop/smart%20money/systemd/why-smart-money-frontend.service)
 
-2. **Option 2: AWS / GCP Virtual Machine (Lightsail or Compute Engine e2-micro)**
-   - Provision an Ubuntu VM ($5/month).
-   - Clone the repository and run `docker-compose up -d`.
-   - Setup a systemd service to keep Docker Compose alive across server restarts.
-   - Notifications will be dispatched to your Telegram bot at 5:00 AM ET reliably.
+### Recommended Cloud Setup ($4–$6/month Ubuntu VPS)
+1. Provision an Ubuntu 22.04/24.04 LTS instance (DigitalOcean Droplet, Linode, Hetzner, or AWS EC2).
+2. Clone repository, setup Python 3.12 and Node.js environments.
+3. Install systemd unit files to ensure autostart on boot and automatic restart on failures.
+4. APScheduler runs continuously in the `America/Toronto` timezone, evaluating US (NYSE/NASDAQ) and Canadian (TSX) trading holidays independently.
 
 ---
 
@@ -129,7 +127,7 @@ To ensure the 5:00 AM America/Toronto market brief and scanning jobs run every t
 2. **Commit Code:**
    ```powershell
    git add .
-   git commit -m "feat: complete Phase 1 Why Smart Money AI intelligence system"
+   git commit -m "feat: complete Why Smart Money AI institutional intelligence system"
    ```
 
 3. **Publish to your GitHub account:**

@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: why_smart_money_db_prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartmoney}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartmoneypassword}
+      POSTGRES_DB: ${POSTGRES_DB:-smart_money}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartmoney} -d ${POSTGRES_DB:-smart_money}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smart_money_prod_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: why_smart_money_backend_prod
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-smartmoney}:${POSTGRES_PASSWORD:-smartmoneypassword}@db:5432/${POSTGRES_DB:-smart_money}
+      - APP_TIMEZONE=America/Toronto
+      - ENABLE_LIVE_TRADING=False
+      - ALPACA_API_KEY=${ALPACA_API_KEY:-}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY:-}
+      - MASSIVE_API_KEY=${MASSIVE_API_KEY:-}
+      - NEWS_API_KEY=${NEWS_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+    volumes:
+      - ./backend/reports:/app/reports
+    ports:
+      - "8000:8000"
+    networks:
+      - smart_money_prod_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: why_smart_money_frontend_prod
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    ports:
+      - "3000:3000"
+    networks:
+      - smart_money_prod_net
+
+volumes:
+  postgres_prod_data:
+
+networks:
+  smart_money_prod_net:
+    driver: bridge

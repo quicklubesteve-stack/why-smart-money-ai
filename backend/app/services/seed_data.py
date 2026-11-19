@@ -6,7 +6,7 @@ import numpy as np
 from sqlalchemy.orm import Session
 from app.models.schema import (
     Stock, DailyBar, SmartMoneyMetric, TradingSignal, AIPrediction,
-    MarketBrief, PaperPortfolio, PaperPosition, PaperOrder, HistoricalPerformance
+    MarketBrief, PaperPortfolio, PaperPosition, PaperOrder, HistoricalPerformance, PredictionRealization
 )
 
 SEED_STOCKS = [
@@ -243,6 +243,9 @@ def generate_historical_bars(base_price: float, days: int = 60):
 def seed_database(db: Session):
     existing_stocks = db.query(Stock).count()
     if existing_stocks > 0:
+        # Check if prediction realizations table needs seeding
+        if db.query(PredictionRealization).count() == 0:
+            seed_prediction_realizations(db)
         return
 
     print("Seeding initial realistic demonstration market data...")
@@ -538,5 +541,103 @@ def seed_database(db: Session):
         )
         db.add(hp)
 
+    seed_prediction_realizations(db)
+    db.commit()
+    print("Database successfully seeded with realistic US and TSX market data.")
+
+def seed_prediction_realizations(db: Session):
+    # Realized Predictions Log: Time-stamped predictions vs realized subsequent outcomes
+    realizations_data = [
+        {
+            "ticker": "NVDA", "exchange": "NASDAQ", "currency": "USD", "horizon": "5D",
+            "forecast_ts": "2026-11-10 05:00:00 EST", "direction": "UP", "prob": 0.72,
+            "entry": 121.40, "realized_ts": "2026-11-15 16:00:00 EST", "realized": 128.50,
+            "return_pct": 5.85, "hit": True, "win": True, "brier": (0.72 - 1.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
+        {
+            "ticker": "PLTR", "exchange": "NYSE", "currency": "USD", "horizon": "5D",
+            "forecast_ts": "2026-11-10 05:00:00 EST", "direction": "UP", "prob": 0.76,
+            "entry": 59.20, "realized_ts": "2026-11-15 16:00:00 EST", "realized": 64.15,
+            "return_pct": 8.36, "hit": True, "win": True, "brier": (0.76 - 1.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
+        {
+            "ticker": "SHOP.TO", "exchange": "TSX", "currency": "CAD", "horizon": "5D",
+            "forecast_ts": "2026-11-10 05:00:00 EST", "direction": "UP", "prob": 0.68,
+            "entry": 142.10, "realized_ts": "2026-11-15 16:00:00 EST", "realized": 148.75,
+            "return_pct": 4.68, "hit": True, "win": True, "brier": (0.68 - 1.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
+        {
+            "ticker": "MSFT", "exchange": "NASDAQ", "currency": "USD", "horizon": "1D",
+            "forecast_ts": "2026-11-14 05:00:00 EST", "direction": "UP", "prob": 0.65,
+            "entry": 418.20, "realized_ts": "2026-11-15 16:00:00 EST", "realized": 422.80,
+            "return_pct": 1.10, "hit": True, "win": True, "brier": (0.65 - 1.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
+        {
+            "ticker": "AMZN", "exchange": "NASDAQ", "currency": "USD", "horizon": "1D",
+            "forecast_ts": "2026-11-14 05:00:00 EST", "direction": "DOWN", "prob": 0.61,
+            "entry": 206.50, "realized_ts": "2026-11-15 16:00:00 EST", "realized": 204.60,
+            "return_pct": -0.92, "hit": True, "win": True, "brier": (0.61 - 1.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
+        {
+            "ticker": "TSLA", "exchange": "NASDAQ", "currency": "USD", "horizon": "Intraday",
+            "forecast_ts": "2026-11-15 09:15:00 EST", "direction": "UP", "prob": 0.58,
+            "entry": 332.00, "realized_ts": "2026-11-15 16:00:00 EST", "realized": 328.50,
+            "return_pct": -1.05, "hit": False, "win": False, "brier": (0.58 - 0.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
+        {
+            "ticker": "RY.TO", "exchange": "TSX", "currency": "CAD", "horizon": "20D",
+            "forecast_ts": "2026-10-20 05:00:00 EST", "direction": "UP", "prob": 0.74,
+            "entry": 164.80, "realized_ts": "2026-11-10 16:00:00 EST", "realized": 172.40,
+            "return_pct": 4.61, "hit": True, "win": True, "brier": (0.74 - 1.0) ** 2,
+            "env": "BACKTEST"
+        },
+        {
+            "ticker": "AAPL", "exchange": "NASDAQ", "currency": "USD", "horizon": "5D",
+            "forecast_ts": "2026-11-03 05:00:00 EST", "direction": "UP", "prob": 0.63,
+            "entry": 221.50, "realized_ts": "2026-11-08 16:00:00 EST", "realized": 224.20,
+            "return_pct": 1.22, "hit": True, "win": True, "brier": (0.63 - 1.0) ** 2,
+            "env": "BACKTEST"
+        },
+        {
+            "ticker": "TD.TO", "exchange": "TSX", "currency": "CAD", "horizon": "5D",
+            "forecast_ts": "2026-11-03 05:00:00 EST", "direction": "DOWN", "prob": 0.62,
+            "entry": 81.20, "realized_ts": "2026-11-08 16:00:00 EST", "realized": 82.50,
+            "return_pct": 1.60, "hit": False, "win": False, "brier": (0.62 - 0.0) ** 2,
+            "env": "BACKTEST"
+        },
+        {
+            "ticker": "GOOGL", "exchange": "NASDAQ", "currency": "USD", "horizon": "20D",
+            "forecast_ts": "2026-10-15 05:00:00 EST", "direction": "UP", "prob": 0.71,
+            "entry": 174.00, "realized_ts": "2026-11-05 16:00:00 EST", "realized": 182.50,
+            "return_pct": 4.88, "hit": True, "win": True, "brier": (0.71 - 1.0) ** 2,
+            "env": "BACKTEST"
+        }
+    ]
+
+    for rd in realizations_data:
+        realization = PredictionRealization(
+            ticker=rd["ticker"],
+            exchange=rd["exchange"],
+            currency=rd["currency"],
+            horizon=rd["horizon"],
+            forecast_timestamp=rd["forecast_ts"],
+            predicted_direction=rd["direction"],
+            calibrated_prob=rd["prob"],
+            entry_price=rd["entry"],
+            realized_timestamp=rd["realized_ts"],
+            realized_price=rd["realized"],
+            realized_return_pct=rd["return_pct"],
+            directional_hit=rd["hit"],
+            trade_win=rd["win"],
+            brier_score_component=round(rd["brier"], 4),
+            environment=rd["env"]
+        )
+        db.add(realization)
     db.commit()
     print("Database successfully seeded with realistic US and TSX market data.")

@@ -209,6 +209,7 @@ def execute_paper_trade(req: TradeOrderRequest, db: Session = Depends(get_db)):
             pos.unrealized_pnl = round((market_price - pos.average_entry_price) * pos.shares, 2)
             pos.unrealized_pnl_pct = round(((market_price - pos.average_entry_price) / pos.average_entry_price) * 100.0, 2)
 
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
     order = PaperOrder(
         portfolio_id=portfolio.id,
         ticker=ticker,
@@ -220,12 +221,98 @@ def execute_paper_trade(req: TradeOrderRequest, db: Session = Depends(get_db)):
         slippage_bps=slippage_bps,
         fee_paid=simulated_fee,
         status="FILLED",
-        created_at=datetime.datetime.utcnow(),
-        executed_at=datetime.datetime.utcnow(),
+        created_at=now_utc,
+        executed_at=now_utc,
         notes=f"Simulated internal fill on Acer Windows node with {slippage_bps} bps slippage"
     )
     db.add(order)
-    portfolio.updated_at = datetime.datetime.utcnow()
+    portfolio.updated_at = now_utc
+    db.commit()
+
+    return OrderResponse(
+        id=order.id,
+        ticker=order.ticker,
+        side=order.side,
+        order_type=order.order_type,
+        shares=order.shares,
+        requested_price=order.requested_price,
+        executed_price=order.executed_price,
+        slippage_bps=order.slippage_bps,
+        fee_paid=order.fee_paid,
+        status=order.status,
+        created_at=order.created_at,
+        executed_at=order.executed_at,
+        notes=order.notes
+    )
+
+class ClosePositionRequest(BaseModel):
+    ticker: str
+    confirm_paper_trading: bool = False
+
+@router.post("/close-position", response_model=OrderResponse)
+def close_paper_position(req: ClosePositionRequest, db: Session = Depends(get_db)):
+    """
+    Exits 100% of an open simulated position at market price with simulated slippage and commission.
+    """
+    if settings.ENABLE_LIVE_TRADING:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Live trading execution is explicitly disabled by security policy."
+        )
+
+    if not req.confirm_paper_trading:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Confirmation required: Set confirm_paper_trading=True to close position in paper simulator."
+        )
+
+    ticker = req.ticker.upper()
+    portfolio = db.query(PaperPortfolio).first()
+    if not portfolio:
+        raise HTTPException(status_code=404, detail="Paper trading portfolio not found")
+
+    pos = db.query(PaperPosition).filter(
+        PaperPosition.portfolio_id == portfolio.id,
+        PaperPosition.ticker == ticker
+    ).first()
+
+    if not pos or pos.shares <= 0:
+        raise HTTPException(status_code=404, detail=f"No open position found for ticker '{ticker}'")
+
+    stock = db.query(Stock).filter(Stock.ticker == ticker).first()
+    market_price = stock.current_price if (stock and stock.current_price) else pos.current_price
+
+    spread_bps = max(3.0, (stock.spread_pct * 10000.0 * 0.5)) if stock else 5.0
+    slippage_bps = round(spread_bps, 1)
+    exec_price = round(market_price * (1.0 - (slippage_bps / 10000.0)), 2)
+    simulated_fee = 1.00
+
+    shares_to_close = pos.shares
+    gross_proceeds = exec_price * shares_to_close
+    net_proceeds = gross_proceeds - simulated_fee
+    realized_pnl = round(net_proceeds - (pos.average_entry_price * shares_to_close), 2)
+
+    portfolio.cash_balance += net_proceeds
+    db.delete(pos)
+
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    order = PaperOrder(
+        portfolio_id=portfolio.id,
+        ticker=ticker,
+        side="SELL",
+        order_type="MARKET",
+        shares=shares_to_close,
+        requested_price=market_price,
+        executed_price=exec_price,
+        slippage_bps=slippage_bps,
+        fee_paid=simulated_fee,
+        status="FILLED",
+        created_at=now_utc,
+        executed_at=now_utc,
+        notes=f"Position closed at market. Realized P&L: ${realized_pnl:.2f} ({slippage_bps} bps slippage)"
+    )
+    db.add(order)
+    portfolio.updated_at = now_utc
     db.commit()
 
     return OrderResponse(

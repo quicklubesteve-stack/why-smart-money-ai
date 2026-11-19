@@ -285,6 +285,7 @@ function PaperTradingContent() {
                       <th className="p-3 text-right">Market Price</th>
                       <th className="p-3 text-right">Market Value</th>
                       <th className="p-3 text-right">Unrealized P&L</th>
+                      <th className="p-3 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-dark-750">
@@ -303,6 +304,27 @@ function PaperTradingContent() {
                           </td>
                           <td className={`p-3 text-right font-bold ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
                             {isUp ? '+' : ''}${pos.unrealized_pnl.toFixed(2)} ({isUp ? '+' : ''}{pos.unrealized_pnl_pct.toFixed(2)}%)
+                          </td>
+                          <td className="p-3 text-center">
+                            <button
+                              onClick={async () => {
+                                if (confirm(`Close entire position of ${pos.shares} shares in ${pos.ticker}?`)) {
+                                  try {
+                                    await api.closePaperPosition(pos.ticker);
+                                    await loadPortfolio();
+                                    setTradeMessage({
+                                      type: 'success',
+                                      text: `Closed ${pos.ticker} position at market price with simulated slippage.`
+                                    });
+                                  } catch (err: any) {
+                                    alert(`Close failed: ${err.message}`);
+                                  }
+                                }
+                              }}
+                              className="px-2.5 py-1 rounded bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 text-[11px] font-sans font-bold transition"
+                            >
+                              Exit Market
+                            </button>
                           </td>
                         </tr>
                       );

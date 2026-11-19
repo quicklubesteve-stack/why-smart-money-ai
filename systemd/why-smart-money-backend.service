@@ -1,0 +1,19 @@
+[Unit]
+Description=Why Smart Money AI - FastAPI Backend & 5 AM APScheduler Engine
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/why-smart-money/backend
+EnvironmentFile=/home/ubuntu/why-smart-money/backend/.env
+Environment="PYTHONPATH=/home/ubuntu/why-smart-money/backend"
+Environment="APP_TIMEZONE=America/Toronto"
+ExecStart=/home/ubuntu/why-smart-money/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
