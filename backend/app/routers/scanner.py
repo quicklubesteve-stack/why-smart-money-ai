@@ -24,6 +24,7 @@ class StockScannerResponse(BaseModel):
     change_pct: float
     relative_volume: float
     volatility_30d: float
+    volatility_score: Optional[int] = 5
     spread_pct: float
     atr_14: Optional[float] = 2.5
     rsi_14: Optional[float] = 50.0

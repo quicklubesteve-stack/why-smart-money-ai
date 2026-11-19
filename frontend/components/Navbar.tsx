@@ -173,21 +173,24 @@ export default function Navbar({ isDemoMode = true }: NavbarProps) {
 
         <div className="flex items-center space-x-4 flex-shrink-0">
           {(liveQuotes.length > 0 ? liveQuotes : [
-            { ticker: 'ANT', current_price: 96.40, change_pct: 3.65, name: 'Anthropic' },
-            { ticker: 'NVDA', current_price: 152.06, change_pct: 2.85, name: 'NVIDIA' },
-            { ticker: 'PLTR', current_price: 154.99, change_pct: 4.10, name: 'Palantir' },
-            { ticker: 'SHOP.TO', current_price: 212.57, change_pct: 3.25, name: 'Shopify' },
-            { ticker: 'TSLA', current_price: 381.35, change_pct: 3.60, name: 'Tesla' },
-            { ticker: 'MSFT', current_price: 502.63, change_pct: 1.12, name: 'Microsoft' },
-            { ticker: 'AAPL', current_price: 349.49, change_pct: 0.65, name: 'Apple' }
+            { ticker: 'ANT', current_price: 96.40, change_pct: 3.65, name: 'Anthropic', volatility_score: 9 },
+            { ticker: 'NVDA', current_price: 152.06, change_pct: 2.85, name: 'NVIDIA', volatility_score: 6 },
+            { ticker: 'PLTR', current_price: 154.99, change_pct: 4.10, name: 'Palantir', volatility_score: 8 },
+            { ticker: 'SHOP.TO', current_price: 212.57, change_pct: 3.25, name: 'Shopify', volatility_score: 7 },
+            { ticker: 'TSLA', current_price: 381.35, change_pct: 3.60, name: 'Tesla', volatility_score: 9 },
+            { ticker: 'MSFT', current_price: 502.63, change_pct: 1.12, name: 'Microsoft', volatility_score: 4 },
+            { ticker: 'AAPL', current_price: 349.49, change_pct: 0.65, name: 'Apple', volatility_score: 3 }
           ]).map((q) => {
             const isUp = (q.change_pct ?? 0) >= 0;
+            const vol = q.volatility_score ?? 5;
+            const volColor = vol <= 3 ? 'text-emerald-400' : vol <= 6 ? 'text-amber-300' : vol <= 8 ? 'text-orange-400' : 'text-rose-400';
+
             return (
               <button
                 key={q.ticker}
                 onClick={() => setSelectedStockTicker(q.ticker)}
                 className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-dark-900 hover:bg-dark-800 border border-dark-750 transition flex-shrink-0 text-[11px]"
-                title={`Click to view ${q.ticker} (${q.name || q.ticker}) detailed quote & forecast`}
+                title={`Click to view ${q.ticker} (${q.name || q.ticker}) detailed quote & forecast (Volatility: ${vol}/10)`}
               >
                 <span className={`font-bold ${q.ticker === 'ANT' ? 'text-cyan-300 underline font-extrabold' : 'text-white'}`}>
                   {q.ticker}
@@ -195,6 +198,9 @@ export default function Navbar({ isDemoMode = true }: NavbarProps) {
                 <span className="text-gray-300">${q.current_price?.toFixed(2)}</span>
                 <span className={`flex items-center text-[10px] ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
                   {isUp ? '+' : ''}{q.change_pct?.toFixed(2)}%
+                </span>
+                <span className={`text-[9px] px-1 py-0.2 rounded bg-dark-850 font-mono ${volColor} border border-dark-700`}>
+                  Vol {vol}/10
                 </span>
                 {q.ticker === 'ANT' && (
                   <span className="text-[9px] px-1 rounded bg-indigo-950 text-indigo-300 font-sans border border-indigo-800">

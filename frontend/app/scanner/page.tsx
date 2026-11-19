@@ -164,6 +164,12 @@ export default function ScannerPage() {
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
+                <th onClick={() => handleSort('volatility_score')} className="p-3.5 text-right cursor-pointer hover:text-white">
+                  <div className="flex items-center justify-end space-x-1">
+                    <span>Volatility (1-10)</span>
+                    <ArrowUpDown className="w-3 h-3" />
+                  </div>
+                </th>
                 <th className="p-3.5 text-right">RSI (14)</th>
                 <th className="p-3.5 text-right">ATR</th>
                 <th className="p-3.5 text-right">Data Integrity</th>
@@ -174,13 +180,13 @@ export default function ScannerPage() {
             <tbody className="divide-y divide-dark-750 font-mono">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-gray-500 font-sans">
+                  <td colSpan={10} className="p-8 text-center text-gray-500 font-sans">
                     Scanning securities across exchanges...
                   </td>
                 </tr>
               ) : stocks.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-gray-500 font-sans">
+                  <td colSpan={10} className="p-8 text-center text-gray-500 font-sans">
                     No securities match the selected filter criteria.
                   </td>
                 </tr>
@@ -188,6 +194,15 @@ export default function ScannerPage() {
                 stocks.map((stock) => {
                   const isUp = stock.change_pct >= 0;
                   const isHighRvol = stock.relative_volume >= 1.5;
+                  const vol = stock.volatility_score ?? 5;
+                  const volStyle =
+                    vol <= 3
+                      ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
+                      : vol <= 6
+                      ? 'bg-amber-950 text-amber-300 border-amber-800'
+                      : vol <= 8
+                      ? 'bg-orange-950 text-orange-400 border-orange-800'
+                      : 'bg-rose-950 text-rose-400 border-rose-800';
 
                   return (
                     <tr key={stock.ticker} className="hover:bg-dark-800/60 transition">
@@ -224,6 +239,11 @@ export default function ScannerPage() {
                             : 'text-gray-300'
                         }`}>
                           {stock.relative_volume.toFixed(2)}x
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold border font-mono ${volStyle}`}>
+                          {vol}/10
                         </span>
                       </td>
                       <td className="p-3.5 text-right font-bold text-gray-300">

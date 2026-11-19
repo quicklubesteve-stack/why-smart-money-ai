@@ -152,7 +152,13 @@ export default function SearchBar({
               results.map((stock, idx) => {
                 const isSelected = selectedIndex === idx;
                 const isUp = (stock.change_pct ?? 0) >= 0;
-                const volPct = (stock.volatility_30d * 100).toFixed(0);
+                const volScore = stock.volatility_score ?? 5;
+                const getVolStyle = (score: number) => {
+                  if (score <= 3) return 'bg-emerald-950/80 text-emerald-400 border-emerald-800';
+                  if (score <= 6) return 'bg-amber-950/80 text-amber-300 border-amber-800';
+                  if (score <= 8) return 'bg-orange-950/80 text-orange-400 border-orange-800';
+                  return 'bg-rose-950/80 text-rose-400 border-rose-800';
+                };
 
                 return (
                   <button
@@ -203,11 +209,11 @@ export default function SearchBar({
                         </div>
                       </div>
 
-                      {/* Volatility Badge */}
-                      <div className="hidden sm:flex flex-col items-end text-[10px] text-gray-400">
-                        <span className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-dark-800 border border-dark-700 text-amber-300">
+                      {/* Volatility Badge (1-10 scale) */}
+                      <div className="hidden sm:flex flex-col items-end text-[10px]">
+                        <span className={`flex items-center space-x-1 px-1.5 py-0.5 rounded border font-mono font-bold ${getVolStyle(volScore)}`}>
                           <Activity className="w-2.5 h-2.5" />
-                          <span>Vol {volPct}%</span>
+                          <span>Vol {volScore}/10</span>
                         </span>
                       </div>
 

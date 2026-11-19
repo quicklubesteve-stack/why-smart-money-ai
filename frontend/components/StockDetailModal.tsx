@@ -244,57 +244,108 @@ export default function StockDetailModal({ ticker, onClose }: StockDetailModalPr
               </div>
 
               {/* SECTION 2: THE VOLATILITY FACTOR */}
-              <div className="glass-panel p-5 rounded-xl border border-dark-750 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider font-mono flex items-center space-x-1.5">
-                    <Activity className="w-3.5 h-3.5 text-amber-400" />
-                    <span>The Volatility Factor & Risk Profile</span>
-                  </span>
-                  <span
-                    className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${
-                      vol?.volatility_regime === 'High'
-                        ? 'bg-red-950 text-red-400 border border-red-800'
-                        : vol?.volatility_regime === 'Moderate'
-                        ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                        : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                    }`}
-                  >
-                    {vol?.volatility_regime || 'Moderate'} Volatility Regime
-                  </span>
-                </div>
+              {(() => {
+                const volScore = vol?.volatility_score ?? stock.volatility_score ?? 5;
+                const getVolBadgeStyle = (score: number) => {
+                  if (score <= 3) return 'bg-emerald-950 text-emerald-400 border-emerald-800';
+                  if (score <= 6) return 'bg-amber-950 text-amber-300 border-amber-800';
+                  if (score <= 8) return 'bg-orange-950 text-orange-400 border-orange-800';
+                  return 'bg-rose-950 text-rose-400 border-rose-800';
+                };
+                const getVolLabel = (score: number) => {
+                  if (score <= 2) return 'Very Low Volatility';
+                  if (score <= 4) return 'Low Volatility';
+                  if (score <= 6) return 'Moderate Volatility';
+                  if (score <= 8) return 'High Volatility';
+                  return 'Extreme Volatility';
+                };
+                const getActiveBarColor = (step: number, score: number) => {
+                  if (step > score) return 'bg-dark-800 border-dark-700';
+                  if (step <= 3) return 'bg-emerald-500 shadow-sm shadow-emerald-500/50';
+                  if (step <= 6) return 'bg-amber-400 shadow-sm shadow-amber-400/50';
+                  if (step <= 8) return 'bg-orange-500 shadow-sm shadow-orange-500/50';
+                  return 'bg-rose-500 shadow-sm shadow-rose-500/50';
+                };
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl bg-dark-850 border border-dark-750">
-                    <span className="text-xs text-gray-400 font-mono">30-Day Historical Volatility</span>
-                    <div className="text-2xl font-bold font-mono text-amber-300 mt-1">
-                      {vol?.volatility_30d_pct?.toFixed(1)}%
+                return (
+                  <div className="glass-panel p-5 rounded-xl border border-dark-750 space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider font-mono flex items-center space-x-1.5">
+                        <Activity className="w-3.5 h-3.5 text-amber-400" />
+                        <span>The Volatility Factor (Institutional Scale 1 - 10)</span>
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-mono font-bold border ${getVolBadgeStyle(volScore)}`}>
+                          Scale {volScore} / 10 • {getVolLabel(volScore)}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[11px] text-gray-500 mt-0.5 block">Annualized standard deviation</span>
-                  </div>
 
-                  <div className="p-4 rounded-xl bg-dark-850 border border-dark-750">
-                    <span className="text-xs text-gray-400 font-mono">14-Day Average True Range (ATR)</span>
-                    <div className="text-2xl font-bold font-mono text-white mt-1">
-                      ${vol?.atr_14?.toFixed(2)}
+                    {/* Visual 10-Segment Bar Meter */}
+                    <div className="p-4 rounded-xl bg-dark-850/80 border border-dark-750 space-y-2.5">
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-emerald-400 font-semibold">1 (Very Low / Defensive)</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-400 text-[11px]">Volatility Level:</span>
+                          <span className="text-lg font-black text-white font-mono">{volScore}</span>
+                          <span className="text-gray-400 text-xs">/ 10</span>
+                        </div>
+                        <span className="text-rose-400 font-semibold">10 (Extreme Volatility)</span>
+                      </div>
+
+                      {/* 10 Visual Segments */}
+                      <div className="grid grid-cols-10 gap-1.5 h-3">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((step) => (
+                          <div
+                            key={step}
+                            className={`rounded-sm transition-all duration-300 ${getActiveBarColor(step, volScore)}`}
+                            title={`Level ${step}/10`}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] text-gray-400 font-mono pt-1">
+                        <span>Safe / Stable</span>
+                        <span>Moderate Risk</span>
+                        <span>Elevated Swings</span>
+                        <span>High / Speculative</span>
+                      </div>
                     </div>
-                    <span className="text-[11px] text-gray-500 mt-0.5 block">
-                      ~{(( (vol?.atr_14 || 2.5) / (stock.current_price || 1) ) * 100).toFixed(1)}% expected daily swing
-                    </span>
-                  </div>
 
-                  <div className="p-4 rounded-xl bg-dark-850 border border-dark-750">
-                    <span className="text-xs text-gray-400 font-mono">Slippage & Spread Impact</span>
-                    <div className="text-2xl font-bold font-mono text-cyan-300 mt-1">
-                      ~{vol?.spread_bps || 8} bps
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-xl bg-dark-850 border border-dark-750">
+                        <span className="text-xs text-gray-400 font-mono">30-Day Historical Volatility</span>
+                        <div className="text-2xl font-bold font-mono text-amber-300 mt-1">
+                          {vol?.volatility_30d_pct?.toFixed(1)}%
+                        </div>
+                        <span className="text-[11px] text-gray-400 mt-0.5 block">Annualized standard deviation</span>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-dark-850 border border-dark-750">
+                        <span className="text-xs text-gray-400 font-mono">14-Day Average True Range (ATR)</span>
+                        <div className="text-2xl font-bold font-mono text-white mt-1">
+                          ${vol?.atr_14?.toFixed(2)}
+                        </div>
+                        <span className="text-[11px] text-gray-400 mt-0.5 block">
+                          ~{(((vol?.atr_14 || 2.5) / (stock.current_price || 1)) * 100).toFixed(1)}% expected daily swing
+                        </span>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-dark-850 border border-dark-750">
+                        <span className="text-xs text-gray-400 font-mono">Slippage & Spread Impact</span>
+                        <div className="text-2xl font-bold font-mono text-cyan-300 mt-1">
+                          ~{vol?.spread_bps || 8} bps
+                        </div>
+                        <span className="text-[11px] text-gray-400 mt-0.5 block">Modeled execution impact</span>
+                      </div>
                     </div>
-                    <span className="text-[11px] text-gray-500 mt-0.5 block">Modeled execution impact</span>
-                  </div>
-                </div>
 
-                <p className="text-xs text-gray-400 leading-relaxed bg-dark-850/50 p-3 rounded-lg border border-dark-750/70">
-                  {vol?.explanation || 'Statistical volatility derived from daily logarithmic close-to-close returns and ATR envelope.'}
-                </p>
-              </div>
+                    <p className="text-xs text-gray-400 leading-relaxed bg-dark-850/50 p-3 rounded-lg border border-dark-750/70">
+                      {vol?.explanation || 'Statistical volatility derived from daily logarithmic close-to-close returns, calibrated on a 1 (low) to 10 (extreme) risk scale.'}
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* SECTION 3: THE HISTORY OF THE STOCK */}
               <div className="glass-panel p-5 rounded-xl border border-dark-750 space-y-4">

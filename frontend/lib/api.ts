@@ -83,10 +83,14 @@ function getClientFallback<T>(endpoint: string, options?: RequestInit): T {
 
     const volPct = Number(((stock.volatility_30d || 0.35) * 100).toFixed(1));
     const regime = volPct >= 40 ? 'High' : volPct >= 20 ? 'Moderate' : 'Low';
+    const volScore = stock.volatility_score || (volPct <= 14 ? 1 : volPct <= 18 ? 2 : volPct <= 23 ? 3 : volPct <= 28 ? 4 : volPct <= 34 ? 5 : volPct <= 40 ? 6 : volPct <= 47 ? 7 : volPct <= 54 ? 8 : volPct <= 63 ? 9 : 10);
 
     const overview: StockOverview = {
       stock,
       volatility: {
+        volatility_score: volScore,
+        volatility_scale: '1-10',
+        volatility_rating: volScore <= 2 ? 'Very Low' : volScore <= 4 ? 'Low' : volScore <= 6 ? 'Moderate' : volScore <= 8 ? 'High' : 'Extreme',
         volatility_30d_pct: volPct,
         annualized_volatility_pct: volPct,
         atr_14: stock.atr_14 || 4.25,
@@ -94,7 +98,7 @@ function getClientFallback<T>(endpoint: string, options?: RequestInit): T {
         spread_pct: stock.spread_pct || 0.0003,
         spread_bps: Number(((stock.spread_pct || 0.0003) * 10000).toFixed(1)),
         volatility_regime: regime,
-        explanation: `Annualized 30-day historical volatility is ${volPct}%, classified as ${regime} volatility regime.`
+        explanation: `Annualized 30-day historical volatility is ${volPct}% (Score: ${volScore}/10 on institutional 1-10 risk scale), classified as ${regime} volatility regime.`
       },
       bars,
       prediction: {

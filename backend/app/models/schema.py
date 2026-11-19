@@ -21,6 +21,7 @@ class Stock(Base):
     change_pct = Column(Float, default=0.0)
     relative_volume = Column(Float, default=1.0)
     volatility_30d = Column(Float, default=0.0)
+    volatility_score = Column(Integer, default=5) # Scale 1 - 10 (1 = very low, 10 = very volatile)
     spread_pct = Column(Float, default=0.01)
     atr_14 = Column(Float, default=2.5)
     rsi_14 = Column(Float, default=52.0)

@@ -220,6 +220,34 @@ SEED_STOCKS = [
     }
 ]
 
+def calculate_volatility_score(volatility_30d: float) -> int:
+    """
+    Institutional 1 to 10 Volatility Scale:
+    1 = Very Low Volatility (<= 14%)
+    10 = Very High Volatility (> 63%)
+    """
+    pct = volatility_30d * 100.0 if volatility_30d < 1.5 else volatility_30d
+    if pct <= 14.0:
+        return 1
+    elif pct <= 18.0:
+        return 2
+    elif pct <= 23.0:
+        return 3
+    elif pct <= 28.0:
+        return 4
+    elif pct <= 34.0:
+        return 5
+    elif pct <= 40.0:
+        return 6
+    elif pct <= 47.0:
+        return 7
+    elif pct <= 54.0:
+        return 8
+    elif pct <= 63.0:
+        return 9
+    else:
+        return 10
+
 def generate_historical_bars(base_price: float, days: int = 60):
     bars = []
     current_date = datetime.date.today() - datetime.timedelta(days=days * 1.5)
@@ -280,6 +308,7 @@ def seed_database(db: Session):
             change_pct=s_data["change_pct"],
             relative_volume=s_data["relative_volume"],
             volatility_30d=s_data["volatility_30d"],
+            volatility_score=calculate_volatility_score(s_data["volatility_30d"]),
             spread_pct=s_data["spread_pct"],
             atr_14=round(s_data["current_price"] * s_data["volatility_30d"] * 0.08, 2),
             rsi_14=round(50.0 + (s_data["change_pct"] * 3.5), 1),

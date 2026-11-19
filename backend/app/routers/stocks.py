@@ -34,6 +34,7 @@ class StockDetailResponse(BaseModel):
     change_pct: float
     relative_volume: float
     volatility_30d: float
+    volatility_score: Optional[int] = 5
     spread_pct: float
     atr_14: Optional[float] = 2.5
     rsi_14: Optional[float] = 50.0
@@ -78,6 +79,7 @@ def get_live_quotes(db: Session = Depends(get_db)):
             "change_pct": s.change_pct,
             "relative_volume": s.relative_volume,
             "volatility_30d": s.volatility_30d,
+            "volatility_score": s.volatility_score or 5,
             "updated_at": now_iso
         }
         for s in stocks
@@ -100,10 +102,18 @@ def get_stock_overview(ticker: str, db: Session = Depends(get_db)):
 
     # Volatility metrics
     vol_pct = round(stock.volatility_30d * 100, 2)
-    regime = "High" if vol_pct >= 40 else "Moderate" if vol_pct >= 20 else "Low"
+    score = stock.volatility_score
+    if not score:
+        from app.services.seed_data import calculate_volatility_score
+        score = calculate_volatility_score(stock.volatility_30d)
+
+    regime = "Extreme" if score >= 9 else "High" if score >= 7 else "Moderate" if score >= 5 else "Low" if score >= 3 else "Very Low"
     spread_bps = round(stock.spread_pct * 10000, 1)
 
     volatility_data = {
+        "volatility_score": score,
+        "volatility_scale": f"{score}/10",
+        "volatility_rating": f"{score}/10 ({regime} Volatility)",
         "volatility_30d_pct": vol_pct,
         "annualized_volatility_pct": vol_pct,
         "atr_14": stock.atr_14 or 2.50,
@@ -111,7 +121,7 @@ def get_stock_overview(ticker: str, db: Session = Depends(get_db)):
         "spread_pct": stock.spread_pct,
         "spread_bps": spread_bps,
         "volatility_regime": regime,
-        "explanation": f"Annualized 30-day historical volatility is {vol_pct}%, classified as {regime} volatility regime."
+        "explanation": f"Volatility rated {score}/10 on institutional risk scale (1=Very Low, 10=Very Volatile). 30-day annualized volatility is {vol_pct}% ({regime} regime)."
     }
 
     # Latest AI prediction

@@ -11,6 +11,7 @@ export interface Stock {
   change_pct: number;
   relative_volume: number;
   volatility_30d: number;
+  volatility_score?: number; // 1 to 10 scale (1 = very low, 10 = very volatile)
   spread_pct: number;
   atr_14?: number;
   rsi_14?: number;
@@ -325,6 +326,9 @@ export interface TierPlansResponse {
 export interface StockOverview {
   stock: Stock;
   volatility: {
+    volatility_score: number; // 1 to 10 scale (1 = very low, 10 = very volatile)
+    volatility_scale?: string; // e.g. "9/10"
+    volatility_rating?: string; // e.g. "9/10 (Extreme Volatility)"
     volatility_30d_pct: number;
     annualized_volatility_pct: number;
     atr_14: number;
