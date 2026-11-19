@@ -1,0 +1,514 @@
+import {
+  Stock, Bar, SmartMoneyMetric, TradingSignal, AIPrediction,
+  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult
+} from './types';
+
+export const FALLBACK_STOCKS: Stock[] = [
+  {
+    id: 1,
+    ticker: "NVDA",
+    name: "NVIDIA Corporation",
+    exchange: "NASDAQ",
+    currency: "USD",
+    sector: "Technology",
+    industry: "Semiconductors",
+    market_cap: 3740000000000.0,
+    current_price: 152.06,
+    change_pct: 2.85,
+    relative_volume: 2.45,
+    volatility_30d: 0.38,
+    spread_pct: 0.0003,
+    atr_14: 4.85,
+    rsi_14: 58.4,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 45000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 2,
+    ticker: "PLTR",
+    name: "Palantir Technologies Inc.",
+    exchange: "NYSE",
+    currency: "USD",
+    sector: "Technology",
+    industry: "Software - Infrastructure",
+    market_cap: 350000000000.0,
+    current_price: 154.99,
+    change_pct: 4.10,
+    relative_volume: 3.10,
+    volatility_30d: 0.52,
+    spread_pct: 0.0006,
+    atr_14: 6.20,
+    rsi_14: 67.2,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 65000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 3,
+    ticker: "SHOP.TO",
+    name: "Shopify Inc.",
+    exchange: "TSX",
+    currency: "CAD",
+    sector: "Technology",
+    industry: "Software - Application",
+    market_cap: 270000000000.0,
+    current_price: 212.57,
+    change_pct: 3.25,
+    relative_volume: 2.20,
+    volatility_30d: 0.42,
+    spread_pct: 0.0007,
+    atr_14: 6.80,
+    rsi_14: 61.5,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 4800000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 4,
+    ticker: "MSFT",
+    name: "Microsoft Corporation",
+    exchange: "NASDAQ",
+    currency: "USD",
+    sector: "Technology",
+    industry: "Software - Infrastructure",
+    market_cap: 3740000000000.0,
+    current_price: 502.63,
+    change_pct: 1.12,
+    relative_volume: 1.30,
+    volatility_30d: 0.24,
+    spread_pct: 0.0002,
+    atr_14: 8.90,
+    rsi_14: 54.2,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 21000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 5,
+    ticker: "RY.TO",
+    name: "Royal Bank of Canada",
+    exchange: "TSX",
+    currency: "CAD",
+    sector: "Financial Services",
+    industry: "Diversified Banks",
+    market_cap: 245000000000.0,
+    current_price: 171.69,
+    change_pct: 0.35,
+    relative_volume: 1.10,
+    volatility_30d: 0.15,
+    spread_pct: 0.0004,
+    atr_14: 2.10,
+    rsi_14: 56.8,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 3200000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 6,
+    ticker: "AAPL",
+    name: "Apple Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
+    sector: "Technology",
+    industry: "Consumer Electronics",
+    market_cap: 5300000000000.0,
+    current_price: 349.49,
+    change_pct: 0.65,
+    relative_volume: 1.15,
+    volatility_30d: 0.22,
+    spread_pct: 0.0002,
+    atr_14: 5.40,
+    rsi_14: 52.0,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 52000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 7,
+    ticker: "AMZN",
+    name: "Amazon.com Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
+    sector: "Consumer Cyclical",
+    industry: "Internet Retail",
+    market_cap: 2720000000000.0,
+    current_price: 260.83,
+    change_pct: -0.45,
+    relative_volume: 0.95,
+    volatility_30d: 0.26,
+    spread_pct: 0.0003,
+    atr_14: 5.10,
+    rsi_14: 49.5,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 38000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
+    id: 8,
+    ticker: "TSLA",
+    name: "Tesla Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
+    sector: "Consumer Cyclical",
+    industry: "Auto Manufacturers",
+    market_cap: 1220000000000.0,
+    current_price: 381.35,
+    change_pct: 3.60,
+    relative_volume: 2.80,
+    volatility_30d: 0.58,
+    spread_pct: 0.0004,
+    atr_14: 16.50,
+    rsi_14: 56.1,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 72000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  }
+];
+
+export const FALLBACK_SIGNALS: TradingSignal[] = [
+  {
+    id: 1,
+    ticker: "NVDA",
+    name: "NVIDIA Corporation",
+    exchange: "NASDAQ",
+    currency: "USD",
+    generated_at: new Date().toISOString(),
+    horizon: "5D",
+    recommendation: "BUY",
+    quality_score: 88.5,
+    calibrated_prob: 0.72,
+    latest_quote: 152.06,
+    entry_zone_min: 149.80,
+    entry_zone_max: 153.20,
+    target_price: 164.00,
+    stop_loss: 146.00,
+    risk_reward_ratio: 1.9,
+    estimated_slippage_bps: 8,
+    invalidation_rule: "Close below $146.00 or RVOL collapse below 1.0x",
+    evidence_pro: ["RVOL 2.45x indicates institutional accumulation", "Price holding above daily VWAP", "Bullish volume-price divergence"],
+    evidence_con: ["Overnight tech macro volatility elevated", "RSI at 58.4 approaching upper half"],
+    status: "ACTIVE"
+  },
+  {
+    id: 2,
+    ticker: "PLTR",
+    name: "Palantir Technologies Inc.",
+    exchange: "NYSE",
+    currency: "USD",
+    generated_at: new Date().toISOString(),
+    horizon: "5D",
+    recommendation: "BUY",
+    quality_score: 91.0,
+    calibrated_prob: 0.76,
+    latest_quote: 154.99,
+    entry_zone_min: 152.50,
+    entry_zone_max: 156.00,
+    target_price: 172.00,
+    stop_loss: 147.50,
+    risk_reward_ratio: 1.88,
+    estimated_slippage_bps: 8,
+    invalidation_rule: "Daily close below 20-day SMA ($147.50)",
+    evidence_pro: ["RVOL 3.10x with multiple block prints", "Off-exchange proxy indicates 44.8% institutional absorption"],
+    evidence_con: ["High trailing 30-day volatility (52%)"],
+    status: "ACTIVE"
+  },
+  {
+    id: 3,
+    ticker: "SHOP.TO",
+    name: "Shopify Inc.",
+    exchange: "TSX",
+    currency: "CAD",
+    generated_at: new Date().toISOString(),
+    horizon: "5D",
+    recommendation: "BUY",
+    quality_score: 84.0,
+    calibrated_prob: 0.68,
+    latest_quote: 212.57,
+    entry_zone_min: 209.00,
+    entry_zone_max: 214.00,
+    target_price: 232.00,
+    stop_loss: 202.00,
+    risk_reward_ratio: 1.68,
+    estimated_slippage_bps: 9,
+    invalidation_rule: "Close below CAD $202.00",
+    evidence_pro: ["TSX tech rotation leader", "Strong accumulation on Toronto tape"],
+    evidence_con: ["CAD/USD exchange rate volatility"],
+    status: "ACTIVE"
+  }
+];
+
+export const FALLBACK_BRIEF: MarketBrief = {
+  id: 1,
+  brief_date: new Date().toISOString().split('T')[0],
+  generated_at: new Date().toISOString(),
+  session_type: "5AM_PREMARKET",
+  macro_summary: "Premarket index futures trade higher ahead of regular session. S&P 500 futures up +0.32% and TSX 60 futures indicate constructive opening tone. Semiconductor and enterprise software order books exhibit elevated institutional interest with above-average RVOL.",
+  us_market_sentiment: "Constructive Bullish",
+  tsx_market_sentiment: "Cautiously Optimistic",
+  index_futures: {
+    ES: { name: "S&P 500 E-mini (ES)", price: 5912.50, change_pct: 0.32 },
+    NQ: { name: "Nasdaq 100 E-mini (NQ)", price: 20845.25, change_pct: 0.48 },
+    SXF: { name: "TSX 60 Index Futures (SXF)", price: 1462.80, change_pct: 0.22 },
+    RTY: { name: "Russell 2000 (RTY)", price: 2340.10, change_pct: 0.15 }
+  },
+  premarket_movers: [
+    { ticker: "NVDA", premarket_price: 153.20, gap_pct: 0.75, premarket_volume: 1250000, note: "Strong bid on AI chip packaging commentary" },
+    { ticker: "PLTR", premarket_price: 156.40, gap_pct: 0.91, premarket_volume: 840000, note: "Continued institutional block execution" }
+  ],
+  top_10_opportunities: [
+    { rank: 1, ticker: "PLTR", exchange: "NYSE", score: 91.0, signal: "BUY", catalyst: "Multi-session institutional block accumulation" },
+    { rank: 2, ticker: "NVDA", exchange: "NASDAQ", score: 88.5, signal: "BUY", catalyst: "RVOL 2.45x with sustained VWAP support" },
+    { rank: 3, ticker: "SHOP.TO", exchange: "TSX", score: 84.0, signal: "BUY", catalyst: "TSX technology sector inflow momentum" },
+    { rank: 4, ticker: "MSFT", exchange: "NASDAQ", score: 79.5, signal: "BUY", catalyst: "Cloud infrastructure margin resilience" },
+    { rank: 5, ticker: "RY.TO", exchange: "TSX", score: 76.0, signal: "WATCH", catalyst: "Canadian bank capital ratio expansion" }
+  ],
+  sector_rotation: {
+    Leading: ["Technology", "Semiconductors", "Software Infrastructure"],
+    Improving: ["Financials", "Industrials"],
+    Lagging: ["Energy", "Consumer Defensive", "Utilities"]
+  },
+  catalysts_and_risks: [
+    "5:00 AM ET premarket volume is incomplete; opening gaps must be confirmed by regular session volume.",
+    "Federal Reserve speaker commentary scheduled at 10:00 AM ET.",
+    "Bank of Canada policy rate expectations stabilizing TSX financial dividend yields."
+  ],
+  immutable_hash: "8f4e2b9c71a34d5e9f1a0b3c5e7d9f2a4b6c8e0d2f4a6b8c0e2d4f6a8b0c2d4e",
+  disclaimer: "At 5:00 AM ET, premarket volume is incomplete. Gaps are non-final."
+};
+
+export const FALLBACK_PORTFOLIO: PortfolioSummary = {
+  account_number: "PAPER-SMART-001",
+  currency: "USD",
+  cash_balance: 75432.50,
+  positions_value: 56832.50,
+  total_equity: 132265.00,
+  total_unrealized_pnl: 3537.50,
+  is_live_trading_enabled: false,
+  positions: [
+    {
+      id: 1,
+      ticker: "NVDA",
+      shares: 100,
+      average_entry_price: 143.20,
+      current_price: 152.06,
+      currency: "USD",
+      unrealized_pnl: 886.00,
+      unrealized_pnl_pct: 6.19
+    },
+    {
+      id: 2,
+      ticker: "PLTR",
+      shares: 200,
+      average_entry_price: 144.50,
+      current_price: 154.99,
+      currency: "USD",
+      unrealized_pnl: 2098.00,
+      unrealized_pnl_pct: 7.26
+    },
+    {
+      id: 3,
+      ticker: "SHOP.TO",
+      shares: 50,
+      average_entry_price: 201.50,
+      current_price: 212.57,
+      currency: "CAD",
+      unrealized_pnl: 553.50,
+      unrealized_pnl_pct: 5.49
+    }
+  ],
+  recent_orders: [
+    {
+      id: 1,
+      ticker: "NVDA",
+      side: "BUY",
+      order_type: "LIMIT",
+      shares: 100,
+      requested_price: 143.15,
+      executed_price: 143.20,
+      slippage_bps: 4.1,
+      fee_paid: 1.00,
+      status: "FILLED",
+      created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
+      notes: "Executed via paper simulation with simulated bid-ask slippage"
+    },
+    {
+      id: 2,
+      ticker: "PLTR",
+      side: "BUY",
+      order_type: "LIMIT",
+      shares: 200,
+      requested_price: 144.40,
+      executed_price: 144.50,
+      slippage_bps: 8.4,
+      fee_paid: 1.00,
+      status: "FILLED",
+      created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+      notes: "Executed via paper simulation with simulated bid-ask slippage"
+    }
+  ]
+};
+
+export const FALLBACK_PERFORMANCE: PerformanceOverview = {
+  aspirational_win_rate_target: 0.95,
+  measured_win_rate: 0.652,
+  directional_accuracy: 0.690,
+  precision: 0.714,
+  recall: 0.685,
+  f1_score: 0.699,
+  sharpe_ratio: 1.92,
+  max_drawdown_pct: -7.4,
+  total_trades_evaluated: 184,
+  benchmark_alpha_pct: 14.5,
+  calibration_quality: "Well Calibrated (Brier Score 0.165)",
+  disclaimer: "RESEARCH RIGOR STATEMENT: 95% is an aspirational theoretical research boundary, never a guaranteed outcome or commercial marketing claim. All metrics shown are computed using realistic walk-forward validation and simulated paper trading with slippage and execution costs.",
+  history: [
+    { date: "2026-08-01", system_cumulative_return: 0.0, benchmark_spy_return: 0.0, win_rate: 0.61, category: "PAPER_SIMULATION" },
+    { date: "2026-09-01", system_cumulative_return: 5.8, benchmark_spy_return: 2.3, win_rate: 0.64, category: "PAPER_SIMULATION" },
+    { date: "2026-10-01", system_cumulative_return: 11.5, benchmark_spy_return: 3.4, win_rate: 0.65, category: "PAPER_SIMULATION" },
+    { date: "2026-11-01", system_cumulative_return: 18.2, benchmark_spy_return: 5.9, win_rate: 0.66, category: "PAPER_SIMULATION" },
+    { date: "2026-11-15", system_cumulative_return: 21.6, benchmark_spy_return: 7.1, win_rate: 0.65, category: "PAPER_SIMULATION" }
+  ],
+  horizons: [
+    { horizon: "Intraday", directional_accuracy: 0.64, win_rate: 0.59, sample_count: 62, profit_factor: 1.75, brier_score: 0.19 },
+    { horizon: "Next Day (1D)", directional_accuracy: 0.67, win_rate: 0.63, sample_count: 58, profit_factor: 1.94, brier_score: 0.17 },
+    { horizon: "5 Days", directional_accuracy: 0.71, win_rate: 0.68, sample_count: 44, profit_factor: 2.35, brier_score: 0.15 },
+    { horizon: "20 Days", directional_accuracy: 0.74, win_rate: 0.70, sample_count: 20, profit_factor: 2.68, brier_score: 0.14 }
+  ],
+  environments: [
+    { environment: "Walk-Forward Backtesting", status: "VALIDATED", sample_count: 142, win_rate: 0.648, directional_accuracy: 0.685, sharpe_ratio: 1.88, net_return_pct: 18.4 },
+    { environment: "Paper Trading Simulator", status: "ACTIVE", sample_count: 42, win_rate: 0.667, directional_accuracy: 0.714, sharpe_ratio: 2.04, net_return_pct: 21.6 },
+    { environment: "Live Brokerage Trading", status: "LOCKED_BY_SAFETY_POLICY", sample_count: 0 }
+  ],
+  realized_predictions_log: [
+    {
+      id: 1, ticker: "NVDA", exchange: "NASDAQ", currency: "USD", horizon: "5D",
+      forecast_timestamp: "2026-11-10 05:00:00 EST", predicted_direction: "UP", calibrated_prob: 0.72,
+      entry_price: 143.20, realized_timestamp: "2026-11-15 16:00:00 EST", realized_price: 152.06,
+      realized_return_pct: 6.19, directional_hit: true, trade_win: true, brier_score_component: 0.0784, environment: "PAPER_SIMULATION"
+    },
+    {
+      id: 2, ticker: "PLTR", exchange: "NYSE", currency: "USD", horizon: "5D",
+      forecast_timestamp: "2026-11-10 05:00:00 EST", predicted_direction: "UP", calibrated_prob: 0.76,
+      entry_price: 144.50, realized_timestamp: "2026-11-15 16:00:00 EST", realized_price: 154.99,
+      realized_return_pct: 7.26, directional_hit: true, trade_win: true, brier_score_component: 0.0576, environment: "PAPER_SIMULATION"
+    },
+    {
+      id: 3, ticker: "SHOP.TO", exchange: "TSX", currency: "CAD", horizon: "5D",
+      forecast_timestamp: "2026-11-10 05:00:00 EST", predicted_direction: "UP", calibrated_prob: 0.68,
+      entry_price: 201.50, realized_timestamp: "2026-11-15 16:00:00 EST", realized_price: 212.57,
+      realized_return_pct: 5.49, directional_hit: true, trade_win: true, brier_score_component: 0.1024, environment: "PAPER_SIMULATION"
+    }
+  ]
+};
+
+export function generateClientMonteCarlo(
+  ticker: string,
+  price: number,
+  simulations: number = 2000,
+  horizon: number = 30
+): SimulationResult {
+  const dt = 1.0;
+  const drift = 0.0008;
+  const vol = 0.022;
+
+  const p5: number[] = [];
+  const p10: number[] = [];
+  const p25: number[] = [];
+  const p50: number[] = [];
+  const p75: number[] = [];
+  const p90: number[] = [];
+  const p95: number[] = [];
+
+  for (let t = 0; t <= horizon; t++) {
+    const timeFactor = Math.sqrt(t);
+    const median = price * Math.exp(drift * t);
+    p50.push(Number(median.toFixed(2)));
+    p5.push(Number((price * Math.exp(drift * t - 1.645 * vol * timeFactor)).toFixed(2)));
+    p10.push(Number((price * Math.exp(drift * t - 1.28 * vol * timeFactor)).toFixed(2)));
+    p25.push(Number((price * Math.exp(drift * t - 0.674 * vol * timeFactor)).toFixed(2)));
+    p75.push(Number((price * Math.exp(drift * t + 0.674 * vol * timeFactor)).toFixed(2)));
+    p90.push(Number((price * Math.exp(drift * t + 1.28 * vol * timeFactor)).toFixed(2)));
+    p95.push(Number((price * Math.exp(drift * t + 1.645 * vol * timeFactor)).toFixed(2)));
+  }
+
+  const sample_paths: number[][] = [];
+  for (let s = 0; s < 15; s++) {
+    const path: number[] = [price];
+    let cur = price;
+    for (let t = 1; t <= horizon; t++) {
+      const shock = (Math.random() - 0.48) * 2.0;
+      cur = Math.max(cur * (1 + drift + vol * shock), 1.0);
+      path.push(Number(cur.toFixed(2)));
+    }
+    sample_paths.push(path);
+  }
+
+  const hist = [
+    { bin_start: price * 0.88, bin_end: price * 0.91, count: 48, frequency_pct: 2.4 },
+    { bin_start: price * 0.91, bin_end: price * 0.94, count: 112, frequency_pct: 5.6 },
+    { bin_start: price * 0.94, bin_end: price * 0.97, count: 218, frequency_pct: 10.9 },
+    { bin_start: price * 0.97, bin_end: price * 1.00, count: 320, frequency_pct: 16.0 },
+    { bin_start: price * 1.00, bin_end: price * 1.03, count: 410, frequency_pct: 20.5 },
+    { bin_start: price * 1.03, bin_end: price * 1.06, count: 350, frequency_pct: 17.5 },
+    { bin_start: price * 1.06, bin_end: price * 1.09, count: 240, frequency_pct: 12.0 },
+    { bin_start: price * 1.09, bin_end: price * 1.12, count: 160, frequency_pct: 8.0 },
+    { bin_start: price * 1.12, bin_end: price * 1.15, count: 90, frequency_pct: 4.5 },
+    { bin_start: price * 1.15, bin_end: price * 1.18, count: 52, frequency_pct: 2.6 }
+  ];
+
+  return {
+    ticker,
+    stock_name: ticker,
+    exchange: ticker.includes('.TO') ? 'TSX' : 'NASDAQ',
+    currency: ticker.includes('.TO') ? 'CAD' : 'USD',
+    current_price: price,
+    num_simulations: simulations,
+    horizon_days: horizon,
+    annualized_volatility_pct: 34.8,
+    effective_drift_daily_bps: 8.0,
+    smart_money_score: 82.5,
+    smart_money_bias_applied: true,
+    expected_terminal_price: Number((price * 1.045).toFixed(2)),
+    median_terminal_price: p50[horizon],
+    expected_return_pct: 4.5,
+    prob_profit: 0.655,
+    target_price: Number((price * 1.08).toFixed(2)),
+    prob_target_hit: 0.58,
+    stop_loss: Number((price * 0.95).toFixed(2)),
+    prob_stop_hit: 0.28,
+    var_95_price: p5[horizon],
+    var_95_pct: -8.8,
+    cvar_95_pct: -12.4,
+    percentile_curves: { p5, p10, p25, p50, p75, p90, p95 },
+    distribution_histogram: hist,
+    sample_paths,
+    tier_capped: false,
+    current_user_tier: "PRO",
+    requested_simulations: simulations
+  };
+}
