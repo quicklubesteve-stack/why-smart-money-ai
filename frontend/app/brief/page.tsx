@@ -3,31 +3,53 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { MarketBrief } from '../../lib/types';
-import { Sunrise, Clock, ShieldCheck, AlertTriangle, Hash, ExternalLink, Calendar, CheckCircle } from 'lucide-react';
+import { Sunrise, Clock, ShieldCheck, AlertTriangle, Hash, ExternalLink, Calendar, CheckCircle, Play, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MarketBriefPage() {
   const [brief, setBrief] = useState<MarketBrief | null>(null);
   const [history, setHistory] = useState<MarketBrief[]>([]);
+  const [schedulerStatus, setSchedulerStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  async function loadData() {
+    try {
+      const [latest, past, sched] = await Promise.all([
+        api.getLatestBrief().catch(() => null),
+        api.getBriefHistory().catch(() => []),
+        api.getSchedulerStatus().catch(() => null)
+      ]);
+      setBrief(latest);
+      setHistory(past);
+      setSchedulerStatus(sched);
+    } catch (err) {
+      console.error('Failed to load briefs:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadBriefs() {
-      try {
-        const [latest, past] = await Promise.all([
-          api.getLatestBrief().catch(() => null),
-          api.getBriefHistory().catch(() => [])
-        ]);
-        setBrief(latest);
-        setHistory(past);
-      } catch (err) {
-        console.error('Failed to load briefs:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadBriefs();
+    loadData();
   }, []);
+
+  async function handleGenerate(sessionType: string = '5AM_PREMARKET') {
+    setGenerating(true);
+    setSuccessMsg(null);
+    try {
+      const res = await api.generateBriefNow(sessionType);
+      setBrief(res);
+      setSuccessMsg(`Generated ${sessionType} Brief (SHA256: ${res.immutable_hash.slice(0, 16)}...)`);
+      const past = await api.getBriefHistory().catch(() => []);
+      setHistory(past);
+    } catch (err: any) {
+      alert(`Generation failed: ${err.message}`);
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -41,14 +63,63 @@ export default function MarketBriefPage() {
             </span>
           </h1>
           <p className="text-xs text-gray-400 mt-1">
-            Immutable morning premarket analysis delivered every trading day before opening bell.
+            Immutable morning premarket analysis delivered every trading day before opening bell with SHA-256 fingerprinting.
           </p>
         </div>
 
-        {/* Date Stamp */}
-        <div className="flex items-center space-x-2 text-xs font-mono bg-dark-900 border border-dark-700 px-3 py-1.5 rounded-lg text-gray-300">
-          <Calendar className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Session: {brief?.brief_date || 'Today'}</span>
+        {/* Date Stamp & Trigger Button */}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => handleGenerate('5AM_PREMARKET')}
+            disabled={generating}
+            className="flex items-center space-x-2 text-xs font-mono bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white px-3.5 py-1.5 rounded-lg shadow transition"
+          >
+            {generating ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Play className="w-3.5 h-3.5" />
+            )}
+            <span>{generating ? 'Running Analysis...' : 'Trigger 5 AM Cycle'}</span>
+          </button>
+
+          <div className="flex items-center space-x-2 text-xs font-mono bg-dark-900 border border-dark-700 px-3 py-1.5 rounded-lg text-gray-300">
+            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Session: {brief?.brief_date || 'Today'}</span>
+          </div>
+        </div>
+      </div>
+
+      {successMsg && (
+        <div className="p-3 rounded-lg bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs font-mono flex items-center justify-between">
+          <span>✓ {successMsg}</span>
+          <button onClick={() => setSuccessMsg(null)} className="text-emerald-400 hover:text-white">✕</button>
+        </div>
+      )}
+
+      {/* Scheduler & Timezone Status Banner */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+        <div className="p-3 rounded-xl bg-dark-850 border border-dark-750 flex items-center space-x-3">
+          <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+          <div>
+            <div className="text-[10px] text-gray-400 uppercase">Timezone Engine</div>
+            <div className="text-white font-bold">{schedulerStatus?.timezone || 'America/Toronto'}</div>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-xl bg-dark-850 border border-dark-750 flex items-center space-x-3">
+          <Sunrise className="w-4 h-4 text-amber-400 flex-shrink-0" />
+          <div>
+            <div className="text-[10px] text-gray-400 uppercase">Primary Schedule</div>
+            <div className="text-white font-bold">5:00 AM Mon-Fri (Premarket)</div>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-xl bg-dark-850 border border-dark-750 flex items-center space-x-3">
+          <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          <div>
+            <div className="text-[10px] text-gray-400 uppercase">Pre-Open Refresh</div>
+            <div className="text-white font-bold">9:15 AM Mon-Fri (Pre-Open)</div>
+          </div>
         </div>
       </div>
 
@@ -66,7 +137,7 @@ export default function MarketBriefPage() {
         </div>
       ) : !brief ? (
         <div className="p-12 text-center text-sm text-gray-500 glass-panel rounded-xl">
-          No market brief generated for this date.
+          No market brief generated for this date. Click &quot;Trigger 5 AM Cycle&quot; to compute today&apos;s report.
         </div>
       ) : (
         <div className="space-y-6">

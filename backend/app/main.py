@@ -19,7 +19,14 @@ async def lifespan(app: FastAPI):
         seed_database(db)
     finally:
         db.close()
+
+    # Start APScheduler in background
+    from app.services.scheduler import start_scheduler, stop_scheduler
+    start_scheduler()
+
     yield
+
+    stop_scheduler()
 
 app = FastAPI(
     title="Why Smart Money AI - Quantitative Market Intelligence API",
@@ -55,6 +62,11 @@ def health_check():
         "timezone": settings.APP_TIMEZONE,
         "environment": settings.ENVIRONMENT
     }
+
+@app.get("/api/scheduler/status")
+def get_scheduler_info():
+    from app.services.scheduler import get_scheduler_status
+    return get_scheduler_status()
 
 if __name__ == "__main__":
     import uvicorn

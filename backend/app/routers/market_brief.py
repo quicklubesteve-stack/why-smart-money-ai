@@ -69,3 +69,31 @@ def get_brief_history(limit: int = 10, db: Session = Depends(get_db)):
         )
         for b in briefs
     ]
+
+@router.post("/generate-now", response_model=MarketBriefResponse)
+def trigger_brief_generation_now(
+    session_type: str = "5AM_PREMARKET",
+    db: Session = Depends(get_db)
+):
+    from app.services.report_generator import market_brief_generator
+    brief_data = market_brief_generator.generate_and_store_brief(
+        db=db,
+        session_type=session_type
+    )
+    return MarketBriefResponse(
+        id=brief_data["id"],
+        brief_date=brief_data["brief_date"],
+        generated_at=datetime.datetime.now(datetime.timezone.utc),
+        session_type=brief_data["session_type"],
+        macro_summary=brief_data["macro_summary"],
+        us_market_sentiment=brief_data["us_market_sentiment"],
+        tsx_market_sentiment=brief_data["tsx_market_sentiment"],
+        index_futures=brief_data["index_futures"],
+        premarket_movers=brief_data["premarket_movers"],
+        top_10_opportunities=brief_data["top_10_opportunities"],
+        sector_rotation=brief_data["sector_rotation"],
+        catalysts_and_risks=brief_data["catalysts_and_risks"],
+        immutable_hash=brief_data["immutable_hash"],
+        disclaimer="At 5 AM ET, premarket volume is incomplete. Gaps are non-final."
+    )
+
