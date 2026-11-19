@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 import { Stock } from '../../lib/types';
 import { Search, Filter, ArrowUpDown, ExternalLink, ShieldAlert, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import StockDetailModal from '../../components/StockDetailModal';
 
 export default function ScannerPage() {
   const [stocks, setStocks] = useState<Stock[]>([]);
@@ -15,6 +16,7 @@ export default function ScannerPage() {
   const [minRvol, setMinRvol] = useState<number>(0);
   const [sortBy, setSortBy] = useState('relative_volume');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedStockModalTicker, setSelectedStockModalTicker] = useState<string | null>(null);
 
   const loadStocks = async () => {
     setLoading(true);
@@ -190,12 +192,18 @@ export default function ScannerPage() {
                   return (
                     <tr key={stock.ticker} className="hover:bg-dark-800/60 transition">
                       <td className="p-3.5">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-bold text-white text-sm">{stock.ticker}</span>
-                          <span className="text-[11px] font-sans text-gray-400 truncate max-w-[140px]">
+                        <button
+                          onClick={() => setSelectedStockModalTicker(stock.ticker)}
+                          className="flex items-center space-x-2 text-left group"
+                          title={`Click to view ${stock.ticker} quote, volatility, history & prediction`}
+                        >
+                          <span className="font-bold text-white text-sm group-hover:text-cyan-400 group-hover:underline transition">
+                            {stock.ticker}
+                          </span>
+                          <span className="text-[11px] font-sans text-gray-400 truncate max-w-[140px] group-hover:text-gray-200">
                             {stock.name}
                           </span>
-                        </div>
+                        </button>
                       </td>
                       <td className="p-3.5">
                         <span className="px-1.5 py-0.5 rounded bg-dark-800 text-gray-300 text-[10px] mr-1.5">
@@ -255,6 +263,14 @@ export default function ScannerPage() {
           </table>
         </div>
       </div>
+
+      {/* Stock Deep-Dive Modal */}
+      {selectedStockModalTicker && (
+        <StockDetailModal
+          ticker={selectedStockModalTicker}
+          onClose={() => setSelectedStockModalTicker(null)}
+        />
+      )}
     </div>
   );
 }

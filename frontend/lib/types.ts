@@ -321,3 +321,39 @@ export interface TierPlansResponse {
   current_tier: string;
   plans: TierPlan[];
 }
+
+export interface StockOverview {
+  stock: Stock;
+  volatility: {
+    volatility_30d_pct: number;
+    annualized_volatility_pct: number;
+    atr_14: number;
+    relative_volume: number;
+    spread_pct: number;
+    spread_bps: number;
+    volatility_regime: string;
+    explanation: string;
+  };
+  bars: Bar[];
+  prediction?: {
+    horizon: string;
+    predicted_direction: string;
+    expected_return_pct: number;
+    confidence_interval_low: number;
+    confidence_interval_high: number;
+    model_confidence: number;
+    model_confidence_pct: number;
+    uncertainty_level: string;
+    is_abstained?: boolean;
+    top_factors: Array<{ feature: string; importance: number }>;
+  };
+  smart_money?: {
+    composite_score: number;
+    volume_price_divergence: string;
+    block_trade_count: number;
+    off_exchange_ratio: number;
+    institutional_13f_change_pct: number;
+    proxy_confidence: string;
+    explanation: string;
+  };
+}

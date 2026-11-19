@@ -1,6 +1,6 @@
 import {
   Stock, Bar, SmartMoneyMetric, TradingSignal, AIPrediction,
-  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult
+  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult, StockOverview
 } from './types';
 import {
   FALLBACK_STOCKS, FALLBACK_SIGNALS, FALLBACK_BRIEF,
@@ -33,6 +33,85 @@ async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T>
 }
 
 function getClientFallback<T>(endpoint: string, options?: RequestInit): T {
+  if (endpoint.startsWith('/api/stocks/search') || (endpoint.startsWith('/api/stocks') && endpoint.includes('?q='))) {
+    const urlObj = new URL(endpoint, 'http://dummy.com');
+    const q = urlObj.searchParams.get('q')?.toLowerCase() || '';
+    if (!q) return FALLBACK_STOCKS as unknown as T;
+    const matches = FALLBACK_STOCKS.filter(s =>
+      s.ticker.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+    );
+    return matches as unknown as T;
+  }
+  if (endpoint.startsWith('/api/stocks/') && endpoint.includes('/overview')) {
+    const ticker = endpoint.split('/')[3]?.split('?')[0];
+    const stock = FALLBACK_STOCKS.find(s => s.ticker.toUpperCase() === ticker.toUpperCase()) || FALLBACK_STOCKS[0];
+    const bars: Bar[] = [];
+    const now = new Date();
+    const curPrice = stock.current_price || 150.0;
+    for (let i = 59; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 86400000);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      const factor = 1.0 - (i * 0.0015) + Math.sin(i * 0.4) * 0.02;
+      const close = i === 0 ? curPrice : Number((curPrice * factor).toFixed(2));
+      const open = Number((close * (1 + (Math.random() - 0.5) * 0.015)).toFixed(2));
+      const high = Number((Math.max(open, close) * (1 + Math.random() * 0.015)).toFixed(2));
+      const low = Number((Math.min(open, close) * (1 - Math.random() * 0.015)).toFixed(2));
+      bars.push({
+        date: d.toISOString().split('T')[0],
+        open,
+        high,
+        low,
+        close,
+        volume: Math.floor(stock.avg_volume_30d ? stock.avg_volume_30d * (0.8 + Math.random() * 0.5) : 35000000),
+        vwap: Number(((open + high + low + close) / 4).toFixed(2))
+      });
+    }
+
+    const volPct = Number(((stock.volatility_30d || 0.35) * 100).toFixed(1));
+    const regime = volPct >= 40 ? 'High' : volPct >= 20 ? 'Moderate' : 'Low';
+
+    const overview: StockOverview = {
+      stock,
+      volatility: {
+        volatility_30d_pct: volPct,
+        annualized_volatility_pct: volPct,
+        atr_14: stock.atr_14 || 4.25,
+        relative_volume: stock.relative_volume || 1.8,
+        spread_pct: stock.spread_pct || 0.0003,
+        spread_bps: Number(((stock.spread_pct || 0.0003) * 10000).toFixed(1)),
+        volatility_regime: regime,
+        explanation: `Annualized 30-day historical volatility is ${volPct}%, classified as ${regime} volatility regime.`
+      },
+      bars,
+      prediction: {
+        horizon: '5D',
+        predicted_direction: stock.change_pct >= 0 ? 'UP' : 'DOWN',
+        expected_return_pct: Number((Math.abs(stock.change_pct) * 0.8 + 1.2).toFixed(2)),
+        confidence_interval_low: -1.8,
+        confidence_interval_high: 4.6,
+        model_confidence: 0.72,
+        model_confidence_pct: 72.0,
+        uncertainty_level: regime,
+        is_abstained: false,
+        top_factors: [
+          { feature: 'Order Flow Proxy Index', importance: 0.34 },
+          { feature: 'Relative Volume Divergence', importance: 0.28 },
+          { feature: 'Distance to 20-day VWAP', importance: 0.21 },
+          { feature: 'Sector Relative Strength', importance: 0.17 }
+        ]
+      },
+      smart_money: {
+        composite_score: 84.5,
+        volume_price_divergence: stock.change_pct >= 0 ? 'Bullish' : 'Neutral',
+        block_trade_count: Math.round((stock.relative_volume || 1.5) * 24),
+        off_exchange_ratio: 0.448,
+        institutional_13f_change_pct: 3.4,
+        proxy_confidence: 'High',
+        explanation: `Elevated RVOL (${stock.relative_volume}x) paired with dark-pool proxy prints indicates active institutional absorption.`
+      }
+    };
+    return overview as unknown as T;
+  }
   if (endpoint.startsWith('/api/scanner')) {
     return FALLBACK_STOCKS as unknown as T;
   }
@@ -178,6 +257,14 @@ function getClientFallback<T>(endpoint: string, options?: RequestInit): T {
 }
 
 export const api = {
+  searchStocks: (query: string = '') => {
+    return fetchJson<Stock[]>(`/api/stocks/search?q=${encodeURIComponent(query)}`);
+  },
+
+  getStockOverview: (ticker: string) => {
+    return fetchJson<StockOverview>(`/api/stocks/${encodeURIComponent(ticker)}/overview`);
+  },
+
   getScannerStocks: (params?: Record<string, any>) => {
     const query = new URLSearchParams(params).toString();
     return fetchJson<Stock[]>(`/api/scanner?${query}`);
