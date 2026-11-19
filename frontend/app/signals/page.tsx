@@ -123,20 +123,43 @@ export default function SignalsPage() {
                 </div>
 
                 {/* Quantitative Metric Grid */}
-                <div className="grid grid-cols-3 gap-2.5 my-4 text-center font-mono">
-                  <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
-                    <span className="text-[10px] text-gray-400 block uppercase">Quality Score</span>
-                    <span className="text-sm font-bold text-cyan-400">{sig.quality_score.toFixed(1)}/100</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
-                    <span className="text-[10px] text-gray-400 block uppercase">Calibrated Prob</span>
-                    <span className="text-sm font-bold text-emerald-400">{(sig.calibrated_prob * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
-                    <span className="text-[10px] text-gray-400 block uppercase">Reward / Risk</span>
-                    <span className="text-sm font-bold text-amber-400">{sig.risk_reward_ratio.toFixed(1)}:1</span>
-                  </div>
-                </div>
+                {(() => {
+                  const volMap: Record<string, number> = {
+                    ANT: 9, TSLA: 9, PLTR: 8, 'SHOP.TO': 7, AMD: 7,
+                    NVDA: 6, MSFT: 4, AMZN: 4, AAPL: 3, 'TD.TO': 3,
+                    'RY.TO': 2, 'ENB.TO': 2, SPY: 1
+                  };
+                  const volScore = volMap[sig.ticker] ?? 5;
+                  const volColor =
+                    volScore <= 3
+                      ? 'text-emerald-400'
+                      : volScore <= 6
+                      ? 'text-amber-300'
+                      : volScore <= 8
+                      ? 'text-orange-400'
+                      : 'text-rose-400';
+
+                  return (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-4 text-center font-mono">
+                      <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                        <span className="text-[10px] text-gray-400 block uppercase">Quality Score</span>
+                        <span className="text-sm font-bold text-cyan-400">{sig.quality_score.toFixed(1)}/100</span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                        <span className="text-[10px] text-gray-400 block uppercase">Calibrated Prob</span>
+                        <span className="text-sm font-bold text-emerald-400">{(sig.calibrated_prob * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                        <span className="text-[10px] text-gray-400 block uppercase">Reward / Risk</span>
+                        <span className="text-sm font-bold text-amber-400">{sig.risk_reward_ratio.toFixed(1)}:1</span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                        <span className="text-[10px] text-gray-400 block uppercase">Volatility (1-10)</span>
+                        <span className={`text-sm font-bold ${volColor}`}>{volScore}/10</span>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Execution Plan Levels */}
                 <div className="p-3 rounded-lg bg-dark-850 border border-dark-750 space-y-1.5 text-xs font-mono mb-4">

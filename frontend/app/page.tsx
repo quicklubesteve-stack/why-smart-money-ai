@@ -186,6 +186,20 @@ export default function DashboardPage() {
                         }`}>
                           {item.signal}
                         </span>
+                        {(() => {
+                          const volMap: Record<string, number> = {
+                            ANT: 9, TSLA: 9, PLTR: 8, 'SHOP.TO': 7, AMD: 7,
+                            NVDA: 6, MSFT: 4, AMZN: 4, AAPL: 3, 'TD.TO': 3,
+                            'RY.TO': 2, 'ENB.TO': 2, SPY: 1
+                          };
+                          const v = volMap[item.ticker] ?? 5;
+                          const c = v <= 3 ? 'text-emerald-400 border-emerald-800' : v <= 6 ? 'text-amber-300 border-amber-800' : v <= 8 ? 'text-orange-400 border-orange-800' : 'text-rose-400 border-rose-800';
+                          return (
+                            <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border bg-dark-900 ${c}`}>
+                              Vol {v}/10
+                            </span>
+                          );
+                        })()}
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{item.catalyst}</p>
                     </div>

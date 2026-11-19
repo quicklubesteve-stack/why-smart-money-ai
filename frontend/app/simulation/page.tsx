@@ -150,7 +150,19 @@ export default function SimulationPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs font-mono">
             {/* Stock Selection */}
             <div>
-              <label className="text-gray-400 block mb-1 font-sans">Select Stock</label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-gray-400 font-sans">Select Stock</label>
+                {(() => {
+                  const curr = stocks.find((s) => s.ticker === ticker);
+                  const v = curr?.volatility_score ?? 5;
+                  const color = v <= 3 ? 'text-emerald-400' : v <= 6 ? 'text-amber-300' : v <= 8 ? 'text-orange-400' : 'text-rose-400';
+                  return (
+                    <span className={`text-[10px] font-bold ${color}`}>
+                      Vol: {v}/10
+                    </span>
+                  );
+                })()}
+              </div>
               <select
                 value={ticker}
                 onChange={(e) => setTicker(e.target.value)}
@@ -158,7 +170,7 @@ export default function SimulationPage() {
               >
                 {stocks.map((s) => (
                   <option key={s.ticker} value={s.ticker}>
-                    {s.ticker} ({s.exchange}) - ${s.current_price?.toFixed(2)}
+                    {s.ticker} ({s.exchange}) - ${s.current_price?.toFixed(2)} - Vol {s.volatility_score ?? 5}/10
                   </option>
                 ))}
               </select>
@@ -270,7 +282,24 @@ export default function SimulationPage() {
 
       {/* KPI Cards */}
       {result && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 font-mono text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 font-mono text-xs">
+          <div className="p-3.5 rounded-xl bg-dark-850 border border-dark-750">
+            <span className="text-[10px] text-gray-400 block font-sans uppercase">Volatility (1-10)</span>
+            {(() => {
+              const v = stocks.find((s) => s.ticker === ticker)?.volatility_score ?? 5;
+              const color = v <= 3 ? 'text-emerald-400' : v <= 6 ? 'text-amber-300' : v <= 8 ? 'text-orange-400' : 'text-rose-400';
+              const label = v <= 2 ? 'Very Low' : v <= 4 ? 'Low' : v <= 6 ? 'Moderate' : v <= 8 ? 'High' : 'Extreme';
+              return (
+                <>
+                  <div className={`text-xl font-bold mt-1 ${color}`}>
+                    {v} / 10
+                  </div>
+                  <span className="text-[10px] text-gray-400 font-sans">{label} Risk</span>
+                </>
+              );
+            })()}
+          </div>
+
           <div className="p-3.5 rounded-xl bg-dark-850 border border-dark-750">
             <span className="text-[10px] text-gray-400 block font-sans uppercase">Probability of Profit</span>
             <div className="text-xl font-bold text-emerald-400 mt-1">

@@ -81,7 +81,7 @@ function SmartMoneyContent() {
         {/* Ticker Selector Dropdown / Pills */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-1 max-w-full">
           <span className="text-xs text-gray-400 font-mono">Watch:</span>
-          {['NVDA', 'PLTR', 'AAPL', 'SHOP.TO', 'RY.TO', 'TSLA'].map((t) => (
+          {['ANT', 'NVDA', 'PLTR', 'AAPL', 'SHOP.TO', 'RY.TO', 'TSLA'].map((t) => (
             <button
               key={t}
               onClick={() => setSelectedTicker(t)}
@@ -156,6 +156,25 @@ function SmartMoneyContent() {
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider font-sans pb-2 border-b border-dark-750">
                 Institutional Proxies
               </h4>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 font-sans">Volatility Scale (1-10):</span>
+                {(() => {
+                  const volMap: Record<string, number> = {
+                    ANT: 9, TSLA: 9, PLTR: 8, 'SHOP.TO': 7, AMD: 7,
+                    NVDA: 6, MSFT: 4, AMZN: 4, AAPL: 3, 'TD.TO': 3,
+                    'RY.TO': 2, 'ENB.TO': 2, SPY: 1
+                  };
+                  const vol = stock?.volatility_score ?? volMap[selectedTicker] ?? 5;
+                  const color = vol <= 3 ? 'text-emerald-400' : vol <= 6 ? 'text-amber-300' : vol <= 8 ? 'text-orange-400' : 'text-rose-400';
+                  const label = vol <= 2 ? 'Very Low' : vol <= 4 ? 'Low' : vol <= 6 ? 'Moderate' : vol <= 8 ? 'High' : 'Extreme';
+                  return (
+                    <span className={`font-bold ${color}`}>
+                      {vol} / 10 ({label})
+                    </span>
+                  );
+                })()}
+              </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 font-sans">Relative Volume (RVOL):</span>

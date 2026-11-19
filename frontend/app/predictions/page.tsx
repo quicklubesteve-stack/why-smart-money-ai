@@ -132,17 +132,40 @@ function PredictionsContent() {
                     </div>
                   </div>
 
-                  {/* Model Confidence & Uncertainty */}
-                  <div className="grid grid-cols-2 gap-3 mb-4 text-xs font-mono">
-                    <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
-                      <span className="text-[10px] text-gray-400 uppercase block">Model Confidence</span>
-                      <span className="text-sm font-bold text-cyan-400">{(p.model_confidence * 100).toFixed(0)}%</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
-                      <span className="text-[10px] text-gray-400 uppercase block">Uncertainty</span>
-                      <span className="text-sm font-bold text-amber-400">{p.uncertainty_level}</span>
-                    </div>
-                  </div>
+                  {/* Model Confidence, Uncertainty & Volatility */}
+                  {(() => {
+                    const volMap: Record<string, number> = {
+                      ANT: 9, TSLA: 9, PLTR: 8, 'SHOP.TO': 7, AMD: 7,
+                      NVDA: 6, MSFT: 4, AMZN: 4, AAPL: 3, 'TD.TO': 3,
+                      'RY.TO': 2, 'ENB.TO': 2, SPY: 1
+                    };
+                    const volScore = volMap[p.ticker] ?? (p.uncertainty_level === 'High' ? 8 : p.uncertainty_level === 'Moderate' ? 5 : 2);
+                    const volColor =
+                      volScore <= 3
+                        ? 'text-emerald-400'
+                        : volScore <= 6
+                        ? 'text-amber-300'
+                        : volScore <= 8
+                        ? 'text-orange-400'
+                        : 'text-rose-400';
+
+                    return (
+                      <div className="grid grid-cols-3 gap-3 mb-4 text-xs font-mono">
+                        <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                          <span className="text-[10px] text-gray-400 uppercase block">Model Confidence</span>
+                          <span className="text-sm font-bold text-cyan-400">{(p.model_confidence * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                          <span className="text-[10px] text-gray-400 uppercase block">Uncertainty</span>
+                          <span className="text-sm font-bold text-amber-400">{p.uncertainty_level}</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-dark-850 border border-dark-750">
+                          <span className="text-[10px] text-gray-400 uppercase block">Volatility (1-10)</span>
+                          <span className={`text-sm font-bold ${volColor}`}>{volScore}/10</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Feature Importance Attribution */}
                   <div>

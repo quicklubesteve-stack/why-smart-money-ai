@@ -53,7 +53,9 @@ export default function MarketHeatmap({ stocks }: MarketHeatmapProps) {
 
               <div className="flex items-center justify-between text-xs font-mono font-semibold pt-1 border-t border-black/20">
                 <span>{isUp ? '+' : ''}{stock.change_pct.toFixed(2)}%</span>
-                <span className="text-[10px] font-normal opacity-90">RVOL: {stock.relative_volume}x</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-black/40 text-amber-200">
+                  Vol {stock.volatility_score ?? 5}/10
+                </span>
               </div>
             </Link>
           );

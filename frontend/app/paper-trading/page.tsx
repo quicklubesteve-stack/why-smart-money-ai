@@ -294,7 +294,24 @@ function PaperTradingContent() {
                       return (
                         <tr key={pos.id} className="hover:bg-dark-800/50">
                           <td className="p-3 font-bold text-white text-sm">
-                            {pos.ticker} <span className="text-[10px] text-gray-400 font-normal">({pos.currency})</span>
+                            <div className="flex items-center space-x-1.5">
+                              <span>{pos.ticker}</span>
+                              <span className="text-[10px] text-gray-400 font-normal">({pos.currency})</span>
+                              {(() => {
+                                const volMap: Record<string, number> = {
+                                  ANT: 9, TSLA: 9, PLTR: 8, 'SHOP.TO': 7, AMD: 7,
+                                  NVDA: 6, MSFT: 4, AMZN: 4, AAPL: 3, 'TD.TO': 3,
+                                  'RY.TO': 2, 'ENB.TO': 2, SPY: 1
+                                };
+                                const v = volMap[pos.ticker] ?? 5;
+                                const c = v <= 3 ? 'text-emerald-400 border-emerald-800' : v <= 6 ? 'text-amber-300 border-amber-800' : v <= 8 ? 'text-orange-400 border-orange-800' : 'text-rose-400 border-rose-800';
+                                return (
+                                  <span className={`text-[9px] px-1.5 py-0.2 rounded border bg-dark-900 ${c}`}>
+                                    Vol {v}/10
+                                  </span>
+                                );
+                              })()}
+                            </div>
                           </td>
                           <td className="p-3 text-right text-gray-200">{pos.shares}</td>
                           <td className="p-3 text-right text-gray-300">${pos.average_entry_price.toFixed(2)}</td>
