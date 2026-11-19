@@ -33,6 +33,20 @@ async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T>
 }
 
 function getClientFallback<T>(endpoint: string, options?: RequestInit): T {
+  if (endpoint.startsWith('/api/stocks/live/quotes')) {
+    const nowIso = new Date().toISOString();
+    return FALLBACK_STOCKS.map(s => ({
+      ticker: s.ticker,
+      name: s.name,
+      exchange: s.exchange,
+      currency: s.currency,
+      current_price: s.current_price,
+      change_pct: s.change_pct,
+      relative_volume: s.relative_volume,
+      volatility_30d: s.volatility_30d,
+      updated_at: nowIso
+    })) as unknown as T;
+  }
   if (endpoint.startsWith('/api/stocks/search') || (endpoint.startsWith('/api/stocks') && endpoint.includes('?q='))) {
     const urlObj = new URL(endpoint, 'http://dummy.com');
     const q = urlObj.searchParams.get('q')?.toLowerCase() || '';
@@ -257,6 +271,20 @@ function getClientFallback<T>(endpoint: string, options?: RequestInit): T {
 }
 
 export const api = {
+  getLiveQuotes: () => {
+    return fetchJson<Array<{
+      ticker: string;
+      name: string;
+      exchange: string;
+      currency: string;
+      current_price: number;
+      change_pct: number;
+      relative_volume: number;
+      volatility_30d: number;
+      updated_at: string;
+    }>>('/api/stocks/live/quotes');
+  },
+
   searchStocks: (query: string = '') => {
     return fetchJson<Stock[]>(`/api/stocks/search?q=${encodeURIComponent(query)}`);
   },

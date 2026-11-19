@@ -126,6 +126,49 @@ export default function StockDetailModal({ ticker, onClose }: StockDetailModalPr
             </div>
           ) : (
             <>
+              {/* Special Historic IPO Showcase for Anthropic (ANT) */}
+              {stock.ticker === 'ANT' && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/80 via-dark-850 to-cyan-950/80 border border-indigo-700/60 shadow-lg space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="flex items-center space-x-1.5 text-xs font-bold text-indigo-300 font-mono">
+                      <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                      <span>HISTORIC INITIAL PUBLIC OFFERING (IPO) DEBUT</span>
+                    </span>
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-200 border border-indigo-700/50">
+                      Nasdaq: ANT • Largest IPO in History ($81.3B Raised)
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div className="p-2.5 rounded-lg bg-dark-900/80 border border-dark-750">
+                      <span className="text-gray-400 text-[10px] uppercase block">Started At (IPO Price)</span>
+                      <strong className="text-cyan-300 text-base">$83.00</strong>
+                      <span className="text-[10px] text-gray-400 block mt-0.5">Priced above $70-$78 range</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-dark-900/80 border border-dark-750">
+                      <span className="text-gray-400 text-[10px] uppercase block">Debut Opening Print</span>
+                      <strong className="text-white text-base">$111.50</strong>
+                      <span className="text-[10px] text-emerald-400 block mt-0.5">High of $114.99 (+38.5%)</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-dark-900/80 border border-dark-750">
+                      <span className="text-gray-400 text-[10px] uppercase block">Where It Is Now</span>
+                      <strong className="text-emerald-300 text-base">${stock.current_price?.toFixed(2)}</strong>
+                      <span className="text-[10px] text-emerald-400 block mt-0.5">
+                        +{(((stock.current_price || 96.40) - 83.00) / 83.00 * 100).toFixed(1)}% vs $83 IPO price
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-dark-900/80 border border-dark-750">
+                      <span className="text-gray-400 text-[10px] uppercase block">AI Model Forecast</span>
+                      <strong className="text-cyan-300 text-base">▲ UP (+5.80%)</strong>
+                      <span className="text-[10px] text-indigo-300 block mt-0.5">Target: $108.50 (74% Prob)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* SECTION 1: WHAT THE STOCK IS TRADING AT */}
               <div className="glass-panel p-5 rounded-xl border border-dark-750 space-y-4">
                 <div className="flex items-center justify-between">

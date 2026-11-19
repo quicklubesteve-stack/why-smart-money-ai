@@ -5,6 +5,29 @@ import {
 
 export const FALLBACK_STOCKS: Stock[] = [
   {
+    id: 0,
+    ticker: "ANT",
+    name: "Anthropic, PBC",
+    exchange: "NASDAQ",
+    currency: "USD",
+    sector: "Technology",
+    industry: "Artificial Intelligence",
+    market_cap: 1680000000000.0,
+    current_price: 96.40,
+    change_pct: 3.65,
+    relative_volume: 4.85,
+    volatility_30d: 0.62,
+    spread_pct: 0.0004,
+    atr_14: 5.80,
+    rsi_14: 68.5,
+    data_quality_score: 100.0,
+    data_quality_status: "VERIFIED_OK",
+    avg_volume_30d: 85000000.0,
+    is_liquid: true,
+    latest_update: new Date().toISOString(),
+    data_source: "DEMO_FEED (SYNTHETIC)"
+  },
+  {
     id: 1,
     ticker: "NVDA",
     name: "NVIDIA Corporation",
@@ -192,6 +215,29 @@ export const FALLBACK_STOCKS: Stock[] = [
 
 export const FALLBACK_SIGNALS: TradingSignal[] = [
   {
+    id: 0,
+    ticker: "ANT",
+    name: "Anthropic, PBC",
+    exchange: "NASDAQ",
+    currency: "USD",
+    generated_at: new Date().toISOString(),
+    horizon: "5D",
+    recommendation: "BUY",
+    quality_score: 92.5,
+    calibrated_prob: 0.74,
+    latest_quote: 96.40,
+    entry_zone_min: 94.50,
+    entry_zone_max: 97.20,
+    target_price: 108.50,
+    stop_loss: 89.50,
+    risk_reward_ratio: 2.15,
+    estimated_slippage_bps: 4,
+    invalidation_rule: "Close below $89.50 or sustained break below IPO anchor $83.00",
+    evidence_pro: ["Historic IPO debut ($81.3B raised, $1.5T valuation) priced above range at $83.00", "High opening day RVOL of 4.85x", "Support consolidation holding firm above $94 level"],
+    evidence_con: ["Elevated post-IPO price discovery volatility (62% annualized)"],
+    status: "ACTIVE"
+  },
+  {
     id: 1,
     ticker: "NVDA",
     name: "NVIDIA Corporation",
@@ -277,15 +323,17 @@ export const FALLBACK_BRIEF: MarketBrief = {
     RTY: { name: "Russell 2000 (RTY)", price: 2340.10, change_pct: 0.15 }
   },
   premarket_movers: [
+    { ticker: "ANT", premarket_price: 98.20, gap_pct: 1.87, premarket_volume: 2150000, note: "Historic IPO debut continuation with massive institutional order flow" },
     { ticker: "NVDA", premarket_price: 153.20, gap_pct: 0.75, premarket_volume: 1250000, note: "Strong bid on AI chip packaging commentary" },
     { ticker: "PLTR", premarket_price: 156.40, gap_pct: 0.91, premarket_volume: 840000, note: "Continued institutional block execution" }
   ],
   top_10_opportunities: [
-    { rank: 1, ticker: "PLTR", exchange: "NYSE", score: 91.0, signal: "BUY", catalyst: "Multi-session institutional block accumulation" },
-    { rank: 2, ticker: "NVDA", exchange: "NASDAQ", score: 88.5, signal: "BUY", catalyst: "RVOL 2.45x with sustained VWAP support" },
-    { rank: 3, ticker: "SHOP.TO", exchange: "TSX", score: 84.0, signal: "BUY", catalyst: "TSX technology sector inflow momentum" },
-    { rank: 4, ticker: "MSFT", exchange: "NASDAQ", score: 79.5, signal: "BUY", catalyst: "Cloud infrastructure margin resilience" },
-    { rank: 5, ticker: "RY.TO", exchange: "TSX", score: 76.0, signal: "WATCH", catalyst: "Canadian bank capital ratio expansion" }
+    { rank: 1, ticker: "ANT", exchange: "NASDAQ", score: 92.5, signal: "BUY", catalyst: "Historic IPO debut ($81.3B raised at $83/share, $1.5T valuation) with 4.85x institutional RVOL" },
+    { rank: 2, ticker: "PLTR", exchange: "NYSE", score: 91.0, signal: "BUY", catalyst: "Multi-session institutional block accumulation" },
+    { rank: 3, ticker: "NVDA", exchange: "NASDAQ", score: 88.5, signal: "BUY", catalyst: "RVOL 2.45x with sustained VWAP support" },
+    { rank: 4, ticker: "SHOP.TO", exchange: "TSX", score: 84.0, signal: "BUY", catalyst: "TSX technology sector inflow momentum" },
+    { rank: 5, ticker: "MSFT", exchange: "NASDAQ", score: 79.5, signal: "BUY", catalyst: "Cloud infrastructure margin resilience" },
+    { rank: 6, ticker: "RY.TO", exchange: "TSX", score: 76.0, signal: "WATCH", catalyst: "Canadian bank capital ratio expansion" }
   ],
   sector_rotation: {
     Leading: ["Technology", "Semiconductors", "Software Infrastructure"],
@@ -305,11 +353,21 @@ export const FALLBACK_PORTFOLIO: PortfolioSummary = {
   account_number: "PAPER-SMART-001",
   currency: "USD",
   cash_balance: 75432.50,
-  positions_value: 56832.50,
-  total_equity: 132265.00,
-  total_unrealized_pnl: 3537.50,
+  positions_value: 71292.50,
+  total_equity: 146725.00,
+  total_unrealized_pnl: 4272.50,
   is_live_trading_enabled: false,
   positions: [
+    {
+      id: 0,
+      ticker: "ANT",
+      shares: 150,
+      average_entry_price: 91.50,
+      current_price: 96.40,
+      currency: "USD",
+      unrealized_pnl: 735.00,
+      unrealized_pnl_pct: 5.36
+    },
     {
       id: 1,
       ticker: "NVDA",
@@ -405,6 +463,12 @@ export const FALLBACK_PERFORMANCE: PerformanceOverview = {
     { environment: "Live Brokerage Trading", status: "LOCKED_BY_SAFETY_POLICY", sample_count: 0 }
   ],
   realized_predictions_log: [
+    {
+      id: 0, ticker: "ANT", exchange: "NASDAQ", currency: "USD", horizon: "5D",
+      forecast_timestamp: "2026-11-19 09:30:00 EST", predicted_direction: "UP", calibrated_prob: 0.74,
+      entry_price: 91.50, realized_timestamp: "2026-11-19 16:00:00 EST", realized_price: 96.40,
+      realized_return_pct: 5.36, directional_hit: true, trade_win: true, brier_score_component: 0.0676, environment: "PAPER_SIMULATION"
+    },
     {
       id: 1, ticker: "NVDA", exchange: "NASDAQ", currency: "USD", horizon: "5D",
       forecast_timestamp: "2026-11-10 05:00:00 EST", predicted_direction: "UP", calibrated_prob: 0.72,

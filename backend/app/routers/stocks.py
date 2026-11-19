@@ -64,6 +64,25 @@ def search_stocks(
         query = query.filter((Stock.ticker.ilike(term)) | (Stock.name.ilike(term)))
     return query.order_by(Stock.relative_volume.desc()).limit(limit).all()
 
+@router.get("/live/quotes")
+def get_live_quotes(db: Session = Depends(get_db)):
+    stocks = db.query(Stock).filter(Stock.is_active == True).order_by(Stock.relative_volume.desc()).all()
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    return [
+        {
+            "ticker": s.ticker,
+            "name": s.name,
+            "exchange": s.exchange,
+            "currency": s.currency,
+            "current_price": s.current_price,
+            "change_pct": s.change_pct,
+            "relative_volume": s.relative_volume,
+            "volatility_30d": s.volatility_30d,
+            "updated_at": now_iso
+        }
+        for s in stocks
+    ]
+
 @router.get("/{ticker}/overview", response_model=StockOverviewResponse)
 def get_stock_overview(ticker: str, db: Session = Depends(get_db)):
     stock = db.query(Stock).filter(Stock.ticker == ticker.upper()).first()

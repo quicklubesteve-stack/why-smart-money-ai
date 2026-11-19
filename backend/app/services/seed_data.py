@@ -11,6 +11,22 @@ from app.models.schema import (
 
 SEED_STOCKS = [
     {
+        "ticker": "ANT",
+        "name": "Anthropic, PBC",
+        "exchange": "NASDAQ",
+        "currency": "USD",
+        "sector": "Technology",
+        "industry": "Artificial Intelligence",
+        "market_cap": 1680000000000.0,
+        "current_price": 96.40,
+        "change_pct": 3.65,
+        "relative_volume": 4.85,
+        "volatility_30d": 0.62,
+        "spread_pct": 0.0004,
+        "avg_volume_30d": 85000000.0,
+        "is_liquid": True
+    },
+    {
         "ticker": "NVDA",
         "name": "NVIDIA Corporation",
         "exchange": "NASDAQ",
@@ -282,9 +298,25 @@ def seed_database(db: Session):
         bars_data = generate_historical_bars(s_data["current_price"], days=60)
         # Ensure the final bar close matches current_price and adheres to OHLC bounds
         if bars_data:
-            bars_data[-1]["close"] = s_data["current_price"]
-            bars_data[-1]["high"] = max(bars_data[-1]["high"], bars_data[-1]["open"], s_data["current_price"])
-            bars_data[-1]["low"] = min(bars_data[-1]["low"], bars_data[-1]["open"], s_data["current_price"])
+            if s_data["ticker"] == "ANT":
+                # Model the historic IPO day and pricing base
+                if len(bars_data) >= 2:
+                    bars_data[-2]["open"] = 83.00
+                    bars_data[-2]["high"] = 83.00
+                    bars_data[-2]["low"] = 83.00
+                    bars_data[-2]["close"] = 83.00
+                    bars_data[-2]["volume"] = 81300000.0
+                    bars_data[-2]["vwap"] = 83.00
+                bars_data[-1]["open"] = 111.50
+                bars_data[-1]["high"] = 114.99
+                bars_data[-1]["low"] = 93.80
+                bars_data[-1]["close"] = 96.40
+                bars_data[-1]["volume"] = 145000000.0
+                bars_data[-1]["vwap"] = 102.30
+            else:
+                bars_data[-1]["close"] = s_data["current_price"]
+                bars_data[-1]["high"] = max(bars_data[-1]["high"], bars_data[-1]["open"], s_data["current_price"])
+                bars_data[-1]["low"] = min(bars_data[-1]["low"], bars_data[-1]["open"], s_data["current_price"])
         for b in bars_data:
             bar = DailyBar(
                 stock_id=stock.id,
@@ -399,16 +431,16 @@ def seed_database(db: Session):
     brief_hash = hashlib.sha256((today_str + brief_content).encode("utf-8")).hexdigest()
 
     top_10 = [
-        {"rank": 1, "ticker": "NVDA", "exchange": "NASDAQ", "score": 88.5, "signal": "BUY", "catalyst": "Semiconductor institutional accumulation proxy spike"},
-        {"rank": 2, "ticker": "PLTR", "exchange": "NYSE", "score": 86.2, "signal": "BUY", "catalyst": "Enterprise AI contract expansions & 3.1x RVOL"},
-        {"rank": 3, "ticker": "SHOP.TO", "exchange": "TSX", "score": 83.4, "signal": "BUY", "catalyst": "Cross-border merchant volume momentum (CAD)"},
-        {"rank": 4, "ticker": "TSLA", "exchange": "NASDAQ", "score": 79.1, "signal": "BUY", "catalyst": "Autonomous fleet headlines & call option volume"},
-        {"rank": 5, "ticker": "MSFT", "exchange": "NASDAQ", "score": 75.8, "signal": "BUY", "catalyst": "Cloud Azure enterprise spending stability"},
-        {"rank": 6, "ticker": "AAPL", "exchange": "NASDAQ", "score": 72.0, "signal": "WATCH", "catalyst": "Hardware upgrade cycle review"},
-        {"rank": 7, "ticker": "RY.TO", "exchange": "TSX", "score": 69.5, "signal": "WATCH", "catalyst": "Canadian banking net interest margin resilience"},
-        {"rank": 8, "ticker": "ENB.TO", "exchange": "TSX", "score": 67.2, "signal": "HOLD", "catalyst": "Defensive dividend yield support"},
-        {"rank": 9, "ticker": "AMZN", "exchange": "NASDAQ", "score": 64.0, "signal": "WATCH", "catalyst": "E-commerce logistics efficiency steady"},
-        {"rank": 10, "ticker": "AMD", "exchange": "NASDAQ", "score": 58.0, "signal": "HOLD", "catalyst": "Data center server chip competition"}
+        {"rank": 1, "ticker": "ANT", "exchange": "NASDAQ", "score": 92.5, "signal": "BUY", "catalyst": "Historic IPO debut ($81.3B raised at $83/share, $1.5T valuation) with 4.85x institutional RVOL"},
+        {"rank": 2, "ticker": "NVDA", "exchange": "NASDAQ", "score": 88.5, "signal": "BUY", "catalyst": "Semiconductor institutional accumulation proxy spike"},
+        {"rank": 3, "ticker": "PLTR", "exchange": "NYSE", "score": 86.2, "signal": "BUY", "catalyst": "Enterprise AI contract expansions & 3.1x RVOL"},
+        {"rank": 4, "ticker": "SHOP.TO", "exchange": "TSX", "score": 83.4, "signal": "BUY", "catalyst": "Cross-border merchant volume momentum (CAD)"},
+        {"rank": 5, "ticker": "TSLA", "exchange": "NASDAQ", "score": 79.1, "signal": "BUY", "catalyst": "Autonomous fleet headlines & call option volume"},
+        {"rank": 6, "ticker": "MSFT", "exchange": "NASDAQ", "score": 75.8, "signal": "BUY", "catalyst": "Cloud Azure enterprise spending stability"},
+        {"rank": 7, "ticker": "AAPL", "exchange": "NASDAQ", "score": 72.0, "signal": "WATCH", "catalyst": "Hardware upgrade cycle review"},
+        {"rank": 8, "ticker": "RY.TO", "exchange": "TSX", "score": 69.5, "signal": "WATCH", "catalyst": "Canadian banking net interest margin resilience"},
+        {"rank": 9, "ticker": "ENB.TO", "exchange": "TSX", "score": 67.2, "signal": "HOLD", "catalyst": "Defensive dividend yield support"},
+        {"rank": 10, "ticker": "AMZN", "exchange": "NASDAQ", "score": 64.0, "signal": "WATCH", "catalyst": "E-commerce logistics efficiency steady"}
     ]
 
     brief = MarketBrief(
@@ -424,6 +456,7 @@ def seed_database(db: Session):
             "VIX": {"name": "Cboe Volatility Index", "price": 14.85, "change_pct": -2.10}
         },
         premarket_movers_json=[
+            {"ticker": "ANT", "premarket_price": 98.20, "gap_pct": 1.87, "premarket_volume": 2150000, "note": "Post-IPO institutional order flow continuation"},
             {"ticker": "NVDA", "premarket_price": 153.20, "gap_pct": 0.75, "premarket_volume": 420000, "note": "Early tech bid"},
             {"ticker": "PLTR", "premarket_price": 156.40, "gap_pct": 0.91, "premarket_volume": 310000, "note": "Strong institutional dark-pool continuation"},
             {"ticker": "AMD", "premarket_price": 534.50, "gap_pct": -0.46, "premarket_volume": 95000, "note": "Minor consolidation"}
@@ -453,6 +486,16 @@ def seed_database(db: Session):
     db.add(portfolio)
     db.flush()
 
+    pos0 = PaperPosition(
+        portfolio_id=portfolio.id,
+        ticker="ANT",
+        shares=150.0,
+        average_entry_price=91.50,
+        current_price=96.40,
+        currency="USD",
+        unrealized_pnl=735.00,
+        unrealized_pnl_pct=5.36
+    )
     pos1 = PaperPosition(
         portfolio_id=portfolio.id,
         ticker="NVDA",
@@ -483,9 +526,22 @@ def seed_database(db: Session):
         unrealized_pnl=553.50,
         unrealized_pnl_pct=5.49
     )
-    db.add_all([pos1, pos2, pos3])
+    db.add_all([pos0, pos1, pos2, pos3])
 
     # Paper Orders History
+    order0 = PaperOrder(
+        portfolio_id=portfolio.id,
+        ticker="ANT",
+        side="BUY",
+        order_type="LIMIT",
+        shares=150.0,
+        requested_price=91.40,
+        executed_price=91.50,
+        slippage_bps=4.5,
+        fee_paid=1.00,
+        status="FILLED",
+        notes="Executed via paper simulation upon IPO opening price discovery"
+    )
     order1 = PaperOrder(
         portfolio_id=portfolio.id,
         ticker="NVDA",
@@ -512,7 +568,7 @@ def seed_database(db: Session):
         status="FILLED",
         notes="Executed via internal paper simulation with simulated bid-ask slippage"
     )
-    db.add_all([order1, order2])
+    db.add_all([order0, order1, order2])
 
     # Historical Performance Tracking Records (Backtest vs Paper vs Benchmark)
     perf_records = [
@@ -548,6 +604,13 @@ def seed_database(db: Session):
 def seed_prediction_realizations(db: Session):
     # Realized Predictions Log: Time-stamped predictions vs realized subsequent outcomes
     realizations_data = [
+        {
+            "ticker": "ANT", "exchange": "NASDAQ", "currency": "USD", "horizon": "5D",
+            "forecast_ts": "2026-11-19 09:30:00 EST", "direction": "UP", "prob": 0.74,
+            "entry": 91.50, "realized_ts": "2026-11-19 16:00:00 EST", "realized": 96.40,
+            "return_pct": 5.36, "hit": True, "win": True, "brier": (0.74 - 1.0) ** 2,
+            "env": "PAPER_SIMULATION"
+        },
         {
             "ticker": "NVDA", "exchange": "NASDAQ", "currency": "USD", "horizon": "5D",
             "forecast_ts": "2026-11-10 05:00:00 EST", "direction": "UP", "prob": 0.72,
