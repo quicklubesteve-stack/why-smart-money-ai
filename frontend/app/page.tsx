@@ -14,7 +14,8 @@ import {
   Sparkles,
   Info,
   Clock,
-  Layers
+  Layers,
+  Newspaper
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -73,13 +74,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Link
-          href="/brief"
-          className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-cyan-600/90 hover:bg-cyan-500 text-xs font-semibold text-white transition self-start md:self-center shadow-lg"
-        >
-          <Sunrise className="w-3.5 h-3.5" />
-          <span>Read Today's 5 AM Brief</span>
-        </Link>
+        <div className="flex items-center space-x-2 self-start md:self-center">
+          <Link
+            href="/brief"
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-cyan-600/90 hover:bg-cyan-500 text-xs font-semibold text-white transition shadow-lg"
+          >
+            <Sunrise className="w-3.5 h-3.5" />
+            <span>5 AM Brief</span>
+          </Link>
+          <Link
+            href="/news"
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-dark-800 hover:bg-dark-750 border border-dark-700 text-xs font-semibold text-white transition shadow-lg"
+          >
+            <Newspaper className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Stock News</span>
+          </Link>
+        </div>
       </div>
 
       {/* Top Metric Cards */}

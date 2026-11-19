@@ -230,3 +230,34 @@ class PredictionRealization(Base):
     trade_win = Column(Boolean, nullable=False)
     brier_score_component = Column(Float, nullable=False)  # (prob - actual)^2
     environment = Column(String, default="PAPER_SIMULATION")  # BACKTEST, PAPER_SIMULATION, LIVE
+
+
+class StockNewsArticle(Base):
+    """
+    Recent stock news and 5:00 AM America/Toronto actionable market intelligence.
+    Provides verified headlines, sentiment, catalyst classification, and tactical
+    what-to-do-today guidance for equities.
+    """
+    __tablename__ = "stock_news_articles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String, nullable=False, index=True)
+    secondary_tickers = Column(JSON, default=list)  # Associated tickers
+    company_name = Column(String, nullable=False)
+    headline = Column(String, nullable=False)
+    summary = Column(Text, nullable=False)
+    source = Column(String, nullable=False)
+    published_at = Column(String, nullable=False)  # e.g. "2026-11-19 05:00:00 EST"
+    publish_cycle = Column(String, default="5AM_DAILY_TORONTO")
+    category = Column(String, default="GENERAL")  # AI_TECH, EARNINGS_IPO, TSX_CANADIAN, MACRO_FED, INSTITUTIONAL_FLOW
+    sentiment = Column(String, default="BULLISH")  # BULLISH, BEARISH, NEUTRAL_CAUTION
+    market_impact_score = Column(Float, default=7.5)  # 1.0 - 10.0
+    action_recommendation = Column(String, default="BUY_ACCUMULATE")  # BUY_ACCUMULATE, HOLD_WATCH, AVOID_TRIM, PROFIT_TAKE
+    what_to_do_today = Column(Text, nullable=False)
+    key_levels_json = Column(JSON, default=dict)  # {"entry_zone": "$92-$94", "target": "$108", "stop": "$88"}
+    volatility_score = Column(Integer, default=5)  # 1 - 10 institutional scale
+    catalyst_type = Column(String, nullable=False)
+    is_sanitized = Column(Boolean, default=True)
+    immutable_hash = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+

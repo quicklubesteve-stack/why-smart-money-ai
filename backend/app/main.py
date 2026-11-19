@@ -7,7 +7,7 @@ from app.config import settings
 
 from app.routers import (
     scanner, stocks, smart_money, signals, predictions,
-    market_brief, portfolio, performance, providers, simulation, tiers
+    market_brief, portfolio, performance, providers, simulation, tiers, news
 )
 
 @asynccontextmanager
@@ -54,6 +54,7 @@ app.include_router(performance.router)
 app.include_router(providers.router)
 app.include_router(simulation.router)
 app.include_router(tiers.router)
+app.include_router(news.router)
 
 @app.get("/api/health")
 def health_check():

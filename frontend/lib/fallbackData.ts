@@ -1,6 +1,7 @@
 import {
   Stock, Bar, SmartMoneyMetric, TradingSignal, AIPrediction,
-  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult
+  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult,
+  StockNewsArticle, DailyActionPlaybook
 } from './types';
 
 export const FALLBACK_STOCKS: Stock[] = [
@@ -681,3 +682,294 @@ export function generateClientMonteCarlo(
     requested_simulations: simulations
   };
 }
+
+export const FALLBACK_NEWS_ARTICLES: StockNewsArticle[] = [
+  {
+    id: 1,
+    ticker: "ANT",
+    secondary_tickers: ["NVDA", "MSFT", "GOOGL"],
+    company_name: "Anthropic, PBC",
+    headline: "Anthropic (ANT) Public Market Debut Triggers Massive Institutional Inflows Amid Claude 3.7 Enterprise Surge",
+    summary: "Anthropic's high-profile public listing on NASDAQ under ticker ANT opened with explosive institutional demand. Following its initial IPO pricing at $83.00, opening prints touched $111.50 before settling near $96.40 with over 24 million shares traded. Tier-1 enterprise cloud providers report unprecedented API consumption of Claude 3.7 reasoning models for software engineering and financial workflows. Order-flow indicators show aggressive accumulation by quantitative and growth funds.",
+    source: "Bloomberg Markets Wire",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "EARNINGS_IPO",
+    sentiment: "BULLISH",
+    market_impact_score: 9.6,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: Accumulate on opening pullbacks into the $92.00–$94.50 zone. Target $108.50 with a strict stop-loss at $87.50 (below IPO opening support). WARNING: Volatility Score is 9/10 (Extreme Volatility / Post-IPO Price Discovery). Keep position sizing constrained to 1.5%–2.5% of total portfolio equity to withstand wide intraday ATR swings ($6.80+).",
+    key_levels: {
+      entry_zone: "$92.00 - $94.50",
+      target_price: "$108.50 (+12.5%)",
+      stop_loss: "$87.50 (-9.2%)",
+      modeled_spread_bps: 12.0
+    },
+    volatility_score: 9,
+    catalyst_type: "IPO Debut & Enterprise AI Model Adoption",
+    is_sanitized: true,
+    immutable_hash: "d7f4e8b91230491823749018274019283749102837491827394817263548192a"
+  },
+  {
+    id: 2,
+    ticker: "NVDA",
+    secondary_tickers: ["AMD", "TSM", "MSFT"],
+    company_name: "NVIDIA Corporation",
+    headline: "NVIDIA (NVDA) Blackwell Architecture Enters Full-Scale Datacenter Shipments; Cloud Hyperscaler Capex Raised",
+    summary: "Nvidia confirmed that production volume for its next-generation Blackwell B200 and GB200 NVL72 AI platforms has ramped ahead of schedule with zero wafer defects reported. Cloud hyperscalers including Microsoft, Amazon, and Google expanded their combined fiscal datacenter capex by 22%, cementing sustained demand for ultra-dense compute clusters through 2027.",
+    source: "Reuters Technology Wire",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "AI_TECH",
+    sentiment: "BULLISH",
+    market_impact_score: 9.2,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: Execute long entries above the $148.50 pivot level. Smart money accumulation gradient remains positive above the 20-day VWAP. Projected price target is $165.00 with a trailing stop at $142.00. Volatility Score is 6/10 (Moderate-High), offering an attractive reward-to-risk ratio (2.4:1).",
+    key_levels: {
+      entry_zone: "$148.00 - $152.00",
+      target_price: "$165.00 (+8.5%)",
+      stop_loss: "$142.00 (-6.6%)",
+      modeled_spread_bps: 5.0
+    },
+    volatility_score: 6,
+    catalyst_type: "Datacenter Capex & GPU Hardware Ramp",
+    is_sanitized: true,
+    immutable_hash: "a8e9f1029384756102938475610293847561029384756102938475610293847b"
+  },
+  {
+    id: 3,
+    ticker: "PLTR",
+    secondary_tickers: ["MSFT", "BA", "LMT"],
+    company_name: "Palantir Technologies Inc.",
+    headline: "Palantir (PLTR) Commercial AIP Customer Count Jumps 83% YoY with Multi-Year Enterprise Deployments",
+    summary: "Palantir released preliminary operational metrics showing unprecedented conversion rates from its 5-day Artificial Intelligence Platform (AIP) customer bootcamps. Over 140 new commercial enterprise agreements were finalized this quarter across US healthcare, manufacturing, and aerospace sectors. Institutional 13F proxy data reveals sustained net accumulation by long-only institutional asset managers.",
+    source: "Wall Street Journal",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "AI_TECH",
+    sentiment: "BULLISH",
+    market_impact_score: 8.9,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: Momentum breakout in progress. Buy dips near $152.00–$155.00. Primary profit-taking target is $172.00; set defensive stop loss at $146.00. NOTE: Volatility Score is 8/10 (Very High Volatility). Use trailing limit orders rather than market orders to minimize spread slippage.",
+    key_levels: {
+      entry_zone: "$152.00 - $155.00",
+      target_price: "$172.00 (+11.0%)",
+      stop_loss: "$146.00 (-5.8%)",
+      modeled_spread_bps: 8.0
+    },
+    volatility_score: 8,
+    catalyst_type: "Enterprise AI Commercial Contract Growth",
+    is_sanitized: true,
+    immutable_hash: "b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2"
+  },
+  {
+    id: 4,
+    ticker: "SHOP.TO",
+    secondary_tickers: ["AMZN", "SHOP"],
+    company_name: "Shopify Inc.",
+    headline: "Shopify (SHOP.TO) Canadian & US Merchant GMV Displays Double-Digit Surge Ahead of Cyber Week",
+    summary: "Shopify's unified merchant platform logged record gross merchandise volume (GMV) with accelerated merchant adoption of AI storefront personalization and international cross-border checkout solutions. Canadian market participants on the TSX noted heavy volume accumulation as institutional flow crossed into large-cap Canadian tech leaders.",
+    source: "The Globe and Mail",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "TSX_CANADIAN",
+    sentiment: "BULLISH",
+    market_impact_score: 8.5,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: Prime TSX growth play. Accumulate on opening strength between $208.00–$213.00 CAD. Target $235.00 CAD; stop loss $198.00 CAD. Volatility Score is 7/10 (High Volatility). Currency note: trades natively in Canadian Dollars (CAD) on TSX.",
+    key_levels: {
+      entry_zone: "$208.00 - $213.00 CAD",
+      target_price: "$235.00 CAD (+10.5%)",
+      stop_loss: "$198.00 CAD (-6.8%)",
+      modeled_spread_bps: 9.0
+    },
+    volatility_score: 7,
+    catalyst_type: "TSX Merchant GMV & E-Commerce Flow",
+    is_sanitized: true,
+    immutable_hash: "c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3"
+  },
+  {
+    id: 5,
+    ticker: "TSLA",
+    secondary_tickers: ["RIVN", "F", "GM"],
+    company_name: "Tesla Inc.",
+    headline: "Tesla (TSLA) Megapack Energy Storage Margins Surge While Robotaxi FSD Fleet Tests Expand",
+    summary: "Tesla's Energy Generation and Storage division recorded a record 31.4% gross margin as utility-scale Megapack deployments in North America and Australia hit all-time highs. Meanwhile, premarket trading displayed wide price swings as autonomous driving regulatory approvals in California and Texas continue to generate debate among analysts.",
+    source: "Financial Times",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "EARNINGS_IPO",
+    sentiment: "NEUTRAL_CAUTION",
+    market_impact_score: 8.7,
+    action_recommendation: "HOLD_WATCH",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: DO NOT CHASE PREMARKET GAPS. Volatility Score is 9/10 (Extreme Volatility). With daily ATR exceeding $14.50, wait for 10:00 AM ET regular session volume confirmation. If price holds the $372.00 support level, consider tactical scalp longs targeting $398.00 with a mandatory tight stop at $364.00.",
+    key_levels: {
+      entry_zone: "$370.00 - $375.00",
+      target_price: "$398.00 (+4.4%)",
+      stop_loss: "$364.00 (-4.5%)",
+      modeled_spread_bps: 10.0
+    },
+    volatility_score: 9,
+    catalyst_type: "Energy Storage Margins & FSD Regulatory Watch",
+    is_sanitized: true,
+    immutable_hash: "d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4"
+  },
+  {
+    id: 6,
+    ticker: "MSFT",
+    secondary_tickers: ["GOOGL", "AMZN", "AAPL"],
+    company_name: "Microsoft Corporation",
+    headline: "Microsoft (MSFT) Commercial Copilot Enterprise Monetization Beats Wall Street Consensus",
+    summary: "Microsoft's latest enterprise survey reveals that commercial seat conversions for Microsoft 365 Copilot reached 42% among Fortune 500 clients, driving higher average revenue per user (ARPU). Azure Cloud infrastructure margins remained resilient at 71%, proving that heavy AI capex investments are yielding direct revenue accretion.",
+    source: "Dow Jones Newswires",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "AI_TECH",
+    sentiment: "BULLISH",
+    market_impact_score: 8.3,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: Low-risk institutional compounder. Buy or add to positions between $498.00–$503.00. Target $535.00; stop at $486.00. Volatility Score is 4/10 (Low-to-Moderate), making this an ideal low-drawdown anchor for both aggressive and conservative accounts.",
+    key_levels: {
+      entry_zone: "$498.00 - $503.00",
+      target_price: "$535.00 (+6.4%)",
+      stop_loss: "$486.00 (-3.3%)",
+      modeled_spread_bps: 3.0
+    },
+    volatility_score: 4,
+    catalyst_type: "Enterprise AI SaaS Monetization",
+    is_sanitized: true,
+    immutable_hash: "e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5"
+  },
+  {
+    id: 7,
+    ticker: "RY.TO",
+    secondary_tickers: ["TD.TO", "BMO.TO", "CM.TO"],
+    company_name: "Royal Bank of Canada",
+    headline: "Royal Bank of Canada (RY.TO) Wealth Management Inflows Hit Multi-Year High; Loan Provisions Stabilize",
+    summary: "Royal Bank of Canada reported stronger-than-anticipated commercial wealth net inflows and lower credit loss provisions as Bank of Canada interest rate cuts provided relief to mortgage and commercial loan holders. Capital ratios remain top-tier with CET1 at 13.2%.",
+    source: "Financial Post",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "TSX_CANADIAN",
+    sentiment: "BULLISH",
+    market_impact_score: 7.8,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: Premier defensive dividend holding. Volatility Score is 2/10 (Very Low Volatility). Accumulate shares below $178.50 CAD for safe yield and steady capital appreciation. Highly insulated from tech volatility.",
+    key_levels: {
+      entry_zone: "$175.00 - $178.00 CAD",
+      target_price: "$188.00 CAD (+6.8%)",
+      stop_loss: "$171.00 CAD (-2.8%)",
+      modeled_spread_bps: 4.0
+    },
+    volatility_score: 2,
+    catalyst_type: "TSX Financials & Stable Net Interest Margins",
+    is_sanitized: true,
+    immutable_hash: "f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6"
+  },
+  {
+    id: 8,
+    ticker: "SPY",
+    secondary_tickers: ["QQQ", "IWM", "XIU.TO"],
+    company_name: "SPDR S&P 500 ETF Trust",
+    headline: "US Index Futures Advance as Wholesale Producer Prices Align with Federal Reserve Soft-Landing Targets",
+    summary: "Benchmark US and Canadian index futures trended higher at the 5:00 AM ET premarket open. The US Producer Price Index (PPI) registered a moderate 0.2% monthly rise, solidifying market expectations for a benign macro interest rate backdrop. Cross-asset credit spreads remain tight, reflecting healthy institutional liquidity.",
+    source: "CNBC Global Markets",
+    published_at: "2026-11-19 05:00:00 EST",
+    publish_cycle: "5AM_DAILY_TORONTO",
+    category: "MACRO_FED",
+    sentiment: "BULLISH",
+    market_impact_score: 8.8,
+    action_recommendation: "BUY_ACCUMULATE",
+    what_to_do_today: "TACTICAL ACTION FOR TODAY: BROAD MARKET PLAYBOOK: The macro backdrop is favorable for equities today. Maintain full equity allocations. Favor liquid market leaders with RVOL > 1.5x. Avoid chasing premarket gaps without volume confirmation at the 9:30 AM open. Benchmark Volatility Score is 1/10 (Lowest Market Risk).",
+    key_levels: {
+      entry_zone: "$590.00 - $592.50",
+      target_price: "$605.00 (+2.5%)",
+      stop_loss: "$584.00 (-1.3%)",
+      modeled_spread_bps: 1.0
+    },
+    volatility_score: 1,
+    catalyst_type: "Macro Wholesale Inflation & Monetary Policy",
+    is_sanitized: true,
+    immutable_hash: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+  }
+];
+
+export const FALLBACK_DAILY_ACTION_PLAYBOOK: DailyActionPlaybook = {
+  title: "5:00 AM America/Toronto Stock Market & News Intelligence",
+  published_at: "2026-11-19 05:00:00 EST",
+  toronto_time: "2026-11-19 05:00 AM EST",
+  daily_cycle: "5:00 AM ET Daily Publication",
+  market_bias: "Constructive Bullish / Growth Momentum (Selectively Accumulating High RVOL)",
+  executive_action_summary: "TODAY'S TACTICAL DIRECTIVE: Index futures are trading constructively with benign wholesale inflation. Prioritize buying confirmed momentum pullbacks in high-quality AI and tech leaders (ANT, NVDA, PLTR, SHOP.TO) between 9:30 AM and 10:30 AM ET regular session volume confirmation. Exercise strict risk management on post-IPO and volatile names (ANT Vol 9/10, TSLA Vol 9/10, PLTR Vol 8/10); size high-volatility holdings below 2.5% of portfolio equity and honor stops.",
+  top_buys_today: [
+    {
+      ticker: "ANT",
+      company_name: "Anthropic, PBC",
+      volatility_score: 9,
+      entry_zone: "$92.00 - $94.50",
+      target: "$108.50 (+12.5%)",
+      stop: "$87.50 (-9.2%)",
+      reason: "Anthropic (ANT) Public Market Debut Triggers Massive Institutional Inflows Amid Claude 3.7 Enterprise Surge"
+    },
+    {
+      ticker: "NVDA",
+      company_name: "NVIDIA Corporation",
+      volatility_score: 6,
+      entry_zone: "$148.00 - $152.00",
+      target: "$165.00 (+8.5%)",
+      stop: "$142.00 (-6.6%)",
+      reason: "NVIDIA (NVDA) Blackwell Architecture Enters Full-Scale Datacenter Shipments; Cloud Hyperscaler Capex Raised"
+    },
+    {
+      ticker: "PLTR",
+      company_name: "Palantir Technologies Inc.",
+      volatility_score: 8,
+      entry_zone: "$152.00 - $155.00",
+      target: "$172.00 (+11.0%)",
+      stop: "$146.00 (-5.8%)",
+      reason: "Palantir (PLTR) Commercial AIP Customer Count Jumps 83% YoY with Multi-Year Enterprise Deployments"
+    },
+    {
+      ticker: "SHOP.TO",
+      company_name: "Shopify Inc.",
+      volatility_score: 7,
+      entry_zone: "$208.00 - $213.00 CAD",
+      target: "$235.00 CAD (+10.5%)",
+      stop: "$198.00 CAD (-6.8%)",
+      reason: "Shopify (SHOP.TO) Canadian & US Merchant GMV Displays Double-Digit Surge Ahead of Cyber Week"
+    }
+  ],
+  stocks_to_watch_today: [
+    {
+      ticker: "TSLA",
+      company_name: "Tesla Inc.",
+      volatility_score: 9,
+      guidance: "DO NOT CHASE PREMARKET GAPS. Volatility Score 9/10. Wait for regular session price consolidation between $370–$375 before entering swing longs."
+    },
+    {
+      ticker: "AAPL",
+      company_name: "Apple Inc.",
+      volatility_score: 3,
+      guidance: "Hold core allocation. Low 3/10 volatility. Add if price pulls back to $242.00–$245.00 technical support."
+    }
+  ],
+  volatility_warnings_today: [
+    {
+      ticker: "ANT",
+      volatility_score: 9,
+      warning: "Score 9/10 (Extreme Volatility / Post-IPO Discovery). Limit allocation to 2% max portfolio equity."
+    },
+    {
+      ticker: "TSLA",
+      volatility_score: 9,
+      warning: "Score 9/10 (Extreme Volatility). Wide intraday ATR of $14.50+. Tight trailing stops required."
+    },
+    {
+      ticker: "PLTR",
+      volatility_score: 8,
+      warning: "Score 8/10 (Very High Volatility). Use trailing limit orders to avoid bid-ask slippage."
+    }
+  ],
+  total_articles_count: 8,
+  immutable_audit_fingerprint: "9e8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a"
+};

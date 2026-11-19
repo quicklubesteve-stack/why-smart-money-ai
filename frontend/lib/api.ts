@@ -1,10 +1,12 @@
 import {
   Stock, Bar, SmartMoneyMetric, TradingSignal, AIPrediction,
-  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult, StockOverview
+  MarketBrief, PortfolioSummary, PerformanceOverview, ProvidersSummary, SimulationResult, StockOverview,
+  StockNewsArticle, DailyActionPlaybook
 } from './types';
 import {
   FALLBACK_STOCKS, FALLBACK_SIGNALS, FALLBACK_BRIEF,
-  FALLBACK_PORTFOLIO, FALLBACK_PERFORMANCE, generateClientMonteCarlo
+  FALLBACK_PORTFOLIO, FALLBACK_PERFORMANCE, generateClientMonteCarlo,
+  FALLBACK_NEWS_ARTICLES, FALLBACK_DAILY_ACTION_PLAYBOOK
 } from './fallbackData';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -430,5 +432,45 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ tier })
     });
+  },
+
+  getRecentStockNews: async (params?: {
+    ticker?: string;
+    category?: string;
+    sentiment?: string;
+    action?: string;
+  }): Promise<StockNewsArticle[]> => {
+    const query = new URLSearchParams();
+    if (params?.ticker && params.ticker !== 'ALL') query.set('ticker', params.ticker);
+    if (params?.category && params.category !== 'ALL') query.set('category', params.category);
+    if (params?.sentiment && params.sentiment !== 'ALL') query.set('sentiment', params.sentiment);
+    if (params?.action && params.action !== 'ALL') query.set('action', params.action);
+
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    const res = await fetchJson<StockNewsArticle[]>(`/api/news${qs}`);
+    if (res && res.length > 0) return res;
+
+    // Filter fallback data client-side
+    let filtered = [...FALLBACK_NEWS_ARTICLES];
+    if (params?.ticker && params.ticker !== 'ALL') {
+      const t = params.ticker.toUpperCase();
+      filtered = filtered.filter(a => a.ticker === t || a.secondary_tickers.includes(t));
+    }
+    if (params?.category && params.category !== 'ALL') {
+      filtered = filtered.filter(a => a.category === params.category);
+    }
+    if (params?.sentiment && params.sentiment !== 'ALL') {
+      filtered = filtered.filter(a => a.sentiment === params.sentiment);
+    }
+    if (params?.action && params.action !== 'ALL') {
+      filtered = filtered.filter(a => a.action_recommendation === params.action);
+    }
+    return filtered;
+  },
+
+  getDailyActionPlaybook: async (): Promise<DailyActionPlaybook> => {
+    const res = await fetchJson<DailyActionPlaybook>('/api/news/daily-action');
+    if (res && res.executive_action_summary) return res;
+    return FALLBACK_DAILY_ACTION_PLAYBOOK;
   }
 };

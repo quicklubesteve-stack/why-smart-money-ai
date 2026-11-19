@@ -361,3 +361,61 @@ export interface StockOverview {
     explanation: string;
   };
 }
+
+export interface StockNewsArticle {
+  id: number;
+  ticker: string;
+  secondary_tickers: string[];
+  company_name: string;
+  headline: string;
+  summary: string;
+  source: string;
+  published_at: string;
+  publish_cycle: string;
+  category: string;
+  sentiment: 'BULLISH' | 'BEARISH' | 'NEUTRAL_CAUTION';
+  market_impact_score: number;
+  action_recommendation: 'BUY_ACCUMULATE' | 'HOLD_WATCH' | 'AVOID_TRIM' | 'PROFIT_TAKE';
+  what_to_do_today: string;
+  key_levels: {
+    entry_zone?: string;
+    target_price?: string;
+    stop_loss?: string;
+    modeled_spread_bps?: number;
+  };
+  volatility_score: number;
+  catalyst_type: string;
+  is_sanitized: boolean;
+  immutable_hash: string;
+}
+
+export interface DailyActionPlaybook {
+  title: string;
+  published_at: string;
+  toronto_time: string;
+  daily_cycle: string;
+  market_bias: string;
+  executive_action_summary: string;
+  top_buys_today: Array<{
+    ticker: string;
+    company_name: string;
+    volatility_score: number;
+    entry_zone: string;
+    target: string;
+    stop: string;
+    reason: string;
+  }>;
+  stocks_to_watch_today: Array<{
+    ticker: string;
+    company_name: string;
+    volatility_score: number;
+    guidance: string;
+  }>;
+  volatility_warnings_today: Array<{
+    ticker: string;
+    volatility_score: number;
+    warning: string;
+  }>;
+  total_articles_count: number;
+  immutable_audit_fingerprint: string;
+}

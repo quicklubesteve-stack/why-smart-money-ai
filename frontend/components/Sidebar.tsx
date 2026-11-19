@@ -15,7 +15,8 @@ import {
   Settings,
   ShieldCheck,
   Dna,
-  CreditCard
+  CreditCard,
+  Newspaper
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: '/simulation', label: '2,000 MC Simulator', icon: Dna },
   { href: '/predictions', label: 'AI Forecasts', icon: BrainCircuit },
   { href: '/brief', label: '5 AM Market Brief', icon: Sunrise },
+  { href: '/news', label: 'Recent Stock News', icon: Newspaper },
   { href: '/paper-trading', label: 'Paper Simulator', icon: Briefcase },
   { href: '/performance', label: 'Model Accuracy', icon: LineChart },
   { href: '/pricing', label: 'Plans & Tiers', icon: CreditCard },

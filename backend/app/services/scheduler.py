@@ -6,6 +6,7 @@ from app.config import settings
 from app.database import SessionLocal
 from app.services.calendar_service import calendar_service
 from app.services.report_generator import market_brief_generator
+from app.services.news_service import news_service
 from app.services.notifications.telegram_dispatcher import telegram_dispatcher
 
 scheduler = AsyncIOScheduler(timezone=pytz.timezone(settings.APP_TIMEZONE))
@@ -32,6 +33,10 @@ async def run_5am_morning_brief_job():
             target_date=today_date.strftime("%Y-%m-%d")
         )
         print(f"[{toronto_now.isoformat()}] 5 AM Brief successfully generated. SHA-256: {brief_data['immutable_hash'][:16]}...")
+
+        # Refresh daily 5 AM stock news and tactical decision playbook
+        news_items = news_service.seed_and_refresh_news(db)
+        print(f"[{toronto_now.isoformat()}] Refreshed {len(news_items)} stock news intelligence articles for 5:00 AM cycle.")
 
         # Dispatch Telegram summary with deduplication
         alert_text = telegram_dispatcher.format_morning_brief_alert(brief_data)
