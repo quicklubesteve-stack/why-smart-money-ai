@@ -13,7 +13,9 @@ import {
   Briefcase,
   LineChart,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  Dna,
+  CreditCard
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -21,10 +23,12 @@ const NAV_ITEMS = [
   { href: '/scanner', label: 'Stock Scanner', icon: Search },
   { href: '/signals', label: 'Trading Signals', icon: Zap },
   { href: '/smart-money', label: 'Smart Money Flows', icon: TrendingUp },
+  { href: '/simulation', label: '2,000 MC Simulator', icon: Dna },
   { href: '/predictions', label: 'AI Forecasts', icon: BrainCircuit },
   { href: '/brief', label: '5 AM Market Brief', icon: Sunrise },
   { href: '/paper-trading', label: 'Paper Simulator', icon: Briefcase },
   { href: '/performance', label: 'Model Accuracy', icon: LineChart },
+  { href: '/pricing', label: 'Plans & Tiers', icon: CreditCard },
   { href: '/settings', label: 'System & Providers', icon: Settings },
 ];
 

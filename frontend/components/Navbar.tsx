@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Clock, AlertTriangle, HelpCircle, ExternalLink, Activity } from 'lucide-react';
+import { ShieldAlert, Clock, AlertTriangle, HelpCircle, ExternalLink, Activity, Sparkles } from 'lucide-react';
 import OnboardingModal from './OnboardingModal';
+import Link from 'next/link';
+import { api } from '../lib/api';
 
 interface NavbarProps {
   isDemoMode?: boolean;
@@ -11,6 +13,7 @@ interface NavbarProps {
 export default function Navbar({ isDemoMode = true }: NavbarProps) {
   const [torontoTime, setTorontoTime] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [activeTier, setActiveTier] = useState<string>('PRO');
 
   useEffect(() => {
     const updateClock = () => {
@@ -31,6 +34,20 @@ export default function Navbar({ isDemoMode = true }: NavbarProps) {
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function fetchTier() {
+      try {
+        const tierData = await api.getCurrentTier();
+        if (tierData?.current_tier) {
+          setActiveTier(tierData.current_tier);
+        }
+      } catch (e) {
+        // fallback
+      }
+    }
+    fetchTier();
   }, []);
 
   return (
@@ -57,6 +74,19 @@ export default function Navbar({ isDemoMode = true }: NavbarProps) {
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* Active Tier Pill */}
+          <Link
+            href="/pricing"
+            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition ${
+              activeTier === 'FREE'
+                ? 'bg-amber-950/60 border-amber-800/80 text-amber-300 hover:bg-amber-900/60'
+                : 'bg-cyan-950/70 border-cyan-700 text-cyan-300 hover:bg-cyan-900/60'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{activeTier} PLAN</span>
+          </Link>
+
           {/* Demo Data Mode Pill */}
           {isDemoMode && (
             <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-amber-950/80 border border-amber-800/70 text-amber-300 text-xs font-medium">
