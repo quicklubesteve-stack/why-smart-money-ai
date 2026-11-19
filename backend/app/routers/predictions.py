@@ -61,3 +61,78 @@ def get_stock_predictions(ticker: str, db: Session = Depends(get_db)):
         )
         for p in predictions
     ]
+
+@router.post("/{ticker}/train-and-forecast", response_model=PredictionResponse)
+def train_and_forecast_stock(
+    ticker: str,
+    horizon: str = "5D",
+    db: Session = Depends(get_db)
+):
+    from app.models.schema import DailyBar
+    from app.services.ml_engine.model_trainer import ai_predictive_engine
+
+    stock = db.query(Stock).filter(Stock.ticker == ticker.upper()).first()
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock '{ticker}' not found")
+
+    bars = (
+        db.query(DailyBar)
+        .filter(DailyBar.stock_id == stock.id)
+        .order_by(DailyBar.date.asc())
+        .all()
+    )
+
+    bars_dicts = [
+        {
+            "date": b.date,
+            "open": b.open,
+            "high": b.high,
+            "low": b.low,
+            "close": b.close,
+            "volume": b.volume,
+            "vwap": b.vwap
+        }
+        for b in bars
+    ]
+
+    forecast = ai_predictive_engine.train_and_forecast(
+        ticker=stock.ticker,
+        bars=bars_dicts,
+        horizon=horizon
+    )
+
+    pred = AIPrediction(
+        stock_id=stock.id,
+        horizon=forecast["horizon"],
+        predicted_direction=forecast["predicted_direction"],
+        expected_return_pct=forecast["expected_return_pct"],
+        confidence_interval_low=forecast["confidence_interval_low"],
+        confidence_interval_high=forecast["confidence_interval_high"],
+        model_confidence=forecast["model_confidence"],
+        uncertainty_level=forecast["uncertainty_level"],
+        is_abstained=forecast["is_abstained"],
+        abstain_reason=forecast["abstain_reason"],
+        top_factors=forecast["top_factors"]
+    )
+    db.add(pred)
+    db.commit()
+    db.refresh(pred)
+
+    return PredictionResponse(
+        ticker=stock.ticker,
+        name=stock.name,
+        exchange=stock.exchange,
+        currency=stock.currency,
+        generated_at=pred.generated_at,
+        horizon=pred.horizon,
+        predicted_direction=pred.predicted_direction,
+        expected_return_pct=pred.expected_return_pct,
+        confidence_interval_low=pred.confidence_interval_low,
+        confidence_interval_high=pred.confidence_interval_high,
+        model_confidence=pred.model_confidence,
+        uncertainty_level=pred.uncertainty_level,
+        is_abstained=pred.is_abstained,
+        abstain_reason=pred.abstain_reason,
+        top_factors=pred.top_factors or []
+    )
+

@@ -4,11 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { PerformanceOverview } from '../../lib/types';
 import MetricCard from '../../components/MetricCard';
-import { LineChart, TrendingUp, ShieldAlert, Target, Award, Info, Scale } from 'lucide-react';
+import { LineChart, TrendingUp, ShieldAlert, Target, Award, Info, Scale, Play, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function PerformancePage() {
   const [perf, setPerf] = useState<PerformanceOverview | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Dynamic Backtester State
+  const [btTicker, setBtTicker] = useState("NVDA");
+  const [btHorizon, setBtHorizon] = useState(5);
+  const [btTarget, setBtTarget] = useState(6.5);
+  const [btStop, setBtStop] = useState(3.5);
+  const [btRunning, setBtRunning] = useState(false);
+  const [btResult, setBtResult] = useState<any | null>(null);
 
   useEffect(() => {
     async function loadPerf() {
@@ -23,6 +31,24 @@ export default function PerformancePage() {
     }
     loadPerf();
   }, []);
+
+  const handleRunBacktest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBtRunning(true);
+    try {
+      const res = await api.runBacktest({
+        ticker: btTicker,
+        horizon_days: btHorizon,
+        target_profit_pct: btTarget,
+        stop_loss_pct: btStop
+      });
+      setBtResult(res);
+    } catch (err) {
+      console.error('Failed to run backtest:', err);
+    } finally {
+      setBtRunning(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -173,6 +199,169 @@ export default function PerformancePage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Interactive Quantitative Backtest Simulator */}
+      <div className="glass-panel p-6 rounded-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-dark-750">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center space-x-2">
+              <Play className="w-4 h-4 text-cyan-400" />
+              <span>Event-Driven Walk-Forward Backtester</span>
+            </h3>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Simulate historical execution with realistic slippage (8 bps), trading fees, and stop/target boundaries.
+            </p>
+          </div>
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-dark-850 text-cyan-300 border border-dark-700">
+            SLIPPAGE & COMMISSIONS DEDUCTED
+          </span>
+        </div>
+
+        {/* Backtest Parameters Form */}
+        <form onSubmit={handleRunBacktest} className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-mono">
+          <div>
+            <label className="text-gray-400 block mb-1 font-sans">Ticker</label>
+            <select
+              value={btTicker}
+              onChange={(e) => setBtTicker(e.target.value)}
+              className="w-full bg-dark-900 border border-dark-700 rounded-lg px-2.5 py-1.5 text-white"
+            >
+              <option value="NVDA">NVDA (NASDAQ, USD)</option>
+              <option value="PLTR">PLTR (NYSE, USD)</option>
+              <option value="SHOP.TO">SHOP.TO (TSX, CAD)</option>
+              <option value="RY.TO">RY.TO (TSX, CAD)</option>
+              <option value="MSFT">MSFT (NASDAQ, USD)</option>
+              <option value="TSLA">TSLA (NASDAQ, USD)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-gray-400 block mb-1 font-sans">Horizon (Days)</label>
+            <select
+              value={btHorizon}
+              onChange={(e) => setBtHorizon(Number(e.target.value))}
+              className="w-full bg-dark-900 border border-dark-700 rounded-lg px-2.5 py-1.5 text-white"
+            >
+              <option value={1}>1 Day (Next Day)</option>
+              <option value={5}>5 Days (Weekly Swing)</option>
+              <option value={20}>20 Days (Monthly)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-gray-400 block mb-1 font-sans">Profit Target (%)</label>
+            <input
+              type="number"
+              step="0.5"
+              value={btTarget}
+              onChange={(e) => setBtTarget(Number(e.target.value))}
+              className="w-full bg-dark-900 border border-dark-700 rounded-lg px-2.5 py-1.5 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-gray-400 block mb-1 font-sans">Stop Loss (%)</label>
+            <input
+              type="number"
+              step="0.5"
+              value={btStop}
+              onChange={(e) => setBtStop(Number(e.target.value))}
+              className="w-full bg-dark-900 border border-dark-700 rounded-lg px-2.5 py-1.5 text-white"
+            />
+          </div>
+
+          <div className="flex items-end col-span-2 sm:col-span-1">
+            <button
+              type="submit"
+              disabled={btRunning}
+              className="w-full py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 font-sans font-bold text-white transition flex items-center justify-center space-x-1.5"
+            >
+              {btRunning ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Running...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5" />
+                  <span>Run Backtest</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Backtest Results Display */}
+        {btResult && (
+          <div className="mt-4 pt-4 border-t border-dark-750 space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono text-center">
+              <div className="p-3 rounded-lg bg-dark-850 border border-dark-750">
+                <span className="text-[10px] text-gray-400 block font-sans uppercase">Win Rate</span>
+                <span className="text-lg font-bold text-cyan-400">{(btResult.win_rate * 100).toFixed(1)}%</span>
+              </div>
+              <div className="p-3 rounded-lg bg-dark-850 border border-dark-750">
+                <span className="text-[10px] text-gray-400 block font-sans uppercase">Sharpe Ratio</span>
+                <span className="text-lg font-bold text-emerald-400">{btResult.sharpe_ratio}</span>
+              </div>
+              <div className="p-3 rounded-lg bg-dark-850 border border-dark-750">
+                <span className="text-[10px] text-gray-400 block font-sans uppercase">Profit Factor</span>
+                <span className="text-lg font-bold text-amber-400">{btResult.profit_factor}</span>
+              </div>
+              <div className="p-3 rounded-lg bg-dark-850 border border-dark-750">
+                <span className="text-[10px] text-gray-400 block font-sans uppercase">Max Drawdown</span>
+                <span className="text-lg font-bold text-red-400">{btResult.max_drawdown}%</span>
+              </div>
+              <div className="p-3 rounded-lg bg-dark-850 border border-dark-750">
+                <span className="text-[10px] text-gray-400 block font-sans uppercase">Brier Score</span>
+                <span className="text-lg font-bold text-gray-200">{btResult.brier_score}</span>
+              </div>
+            </div>
+
+            {/* Simulated Trade Execution Log */}
+            <div>
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider font-sans block mb-2">
+                Simulated Executions ({btResult.trades.length} trades evaluated)
+              </span>
+              <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-dark-850 text-gray-400 uppercase sticky top-0">
+                    <tr>
+                      <th className="p-2">Date</th>
+                      <th className="p-2 text-right">Entry</th>
+                      <th className="p-2 text-right">Exit</th>
+                      <th className="p-2 text-right">Return %</th>
+                      <th className="p-2 text-right">P&L ($)</th>
+                      <th className="p-2">Outcome</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-dark-750">
+                    {btResult.trades.map((t: any, i: number) => (
+                      <tr key={i} className="hover:bg-dark-800/40">
+                        <td className="p-2 text-gray-300">{t.entry_date}</td>
+                        <td className="p-2 text-right text-gray-300">${t.entry_price.toFixed(2)}</td>
+                        <td className="p-2 text-right text-white font-bold">${t.exit_price.toFixed(2)}</td>
+                        <td className={`p-2 text-right font-bold ${t.return_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {t.return_pct >= 0 ? '+' : ''}{t.return_pct.toFixed(2)}%
+                        </td>
+                        <td className={`p-2 text-right ${t.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${t.pnl.toFixed(2)}
+                        </td>
+                        <td className="p-2">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                            t.is_win ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-red-950 text-red-400 border border-red-800'
+                          }`}>
+                            {t.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

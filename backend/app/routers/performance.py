@@ -76,3 +76,52 @@ def get_performance_stats(db: Session = Depends(get_db)):
             HorizonPerformance(horizon="20 Days", directional_accuracy=0.74, win_rate=0.70, sample_count=20, profit_factor=2.68, brier_score=0.14)
         ]
     )
+
+class BacktestRequest(BaseModel):
+    ticker: str = "NVDA"
+    horizon_days: int = 5
+    target_profit_pct: float = 6.5
+    stop_loss_pct: float = 3.5
+
+@router.post("/run-backtest")
+def run_dynamic_backtest(req: BacktestRequest, db: Session = Depends(get_db)):
+    from app.models.schema import Stock, DailyBar
+    from app.services.ml_engine.backtester import quantitative_backtester
+
+    stock = db.query(Stock).filter(Stock.ticker == req.ticker.upper()).first()
+    if not stock:
+        # Fallback to first available stock
+        stock = db.query(Stock).first()
+
+    bars = (
+        db.query(DailyBar)
+        .filter(DailyBar.stock_id == stock.id)
+        .order_by(DailyBar.date.asc())
+        .all()
+    )
+
+    bars_dicts = [
+        {
+            "date": b.date,
+            "open": b.open,
+            "high": b.high,
+            "low": b.low,
+            "close": b.close,
+            "volume": b.volume,
+            "vwap": b.vwap
+        }
+        for b in bars
+    ]
+
+    results = quantitative_backtester.run_backtest(
+        bars=bars_dicts,
+        horizon_days=req.horizon_days,
+        target_profit_pct=req.target_profit_pct,
+        stop_loss_pct=req.stop_loss_pct
+    )
+
+    results["ticker"] = stock.ticker
+    results["currency"] = stock.currency
+    results["aspirational_target"] = "95% Aspirational Research Target (Not a marketing claim)"
+    return results
+
